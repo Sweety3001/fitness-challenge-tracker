@@ -1,66 +1,94 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { api } from "../api/api";
+import AuthLayout from "../layouts/AuthLayout";
+import AnimatedPage from "../components/AnimatedPage";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
-  const [show, setShow] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    setShow(true);
-  }, []);
+  const handleChange = (e) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setError("");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const res = await api.login(form);
+    setLoading(false);
+
+    if (res?.accessToken) {
+      login(res.accessToken);
+      navigate("/dashboard");
+
+    } else {
+      setError(res?.message || "Login failed");
+    }
+  };
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-black to-indigo-900 relative overflow-hidden">
-      
-      {/* Background Glow */}
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1558611848-73f7eb4001a1?q=80')] bg-cover bg-center opacity-20"></div>
-      <div className="absolute inset-0 bg-gradient-to-br from-black/80 to-black/60"></div>
+    <AnimatedPage>
+    <AuthLayout
+  title="Log in"
+  subtitle="Welcome back. Let’s continue."
+  variant="login"
+>
 
-      {/* Container */}
-      <div
-        className={`relative z-10 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl p-8 transition-all duration-700 ${
-          show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-        }`}
-      >
-        <h2 className="text-4xl font-bold text-white text-center mb-6">
-          Welcome Back
-        </h2>
+      {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
-        {/* Form */}
-        <form className="space-y-5">
-          <div>
-            <label className="text-gray-300 text-sm">Email</label>
-            <input
-              type="email"
-              className="mt-1 w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-gray-400 border border-white/20 focus:border-purple-400 outline-none"
-              placeholder="Enter email"
-            />
-          </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          name="email"
+          type="email"
+          placeholder="Email"
+          onChange={handleChange}
+          className="w-full px-4 py-2.5 rounded-lg bg-[#151522] text-white border border-gray-700 focus:ring-2 focus:ring-violet-500 outline-none"
+        />
 
-          <div>
-            <label className="text-gray-300 text-sm">Password</label>
-            <input
-              type="password"
-              className="mt-1 w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-gray-400 border border-white/20 focus:border-purple-400 outline-none"
-              placeholder="Enter password"
-            />
-          </div>
+        <input
+          name="password"
+          type="password"
+          placeholder="Password"
+          onChange={handleChange}
+          className="w-full px-4 py-2.5 rounded-lg bg-[#151522] text-white border border-gray-700 focus:ring-2 focus:ring-violet-500 outline-none"
+        />
 
-          {/* Login Button */}
-          <button
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold shadow-lg hover:shadow-[0_0_20px_3px_rgba(216,115,255,0.4)] transition-all hover:scale-[1.03]"
-          >
-            Login
-          </button>
+        <div className="text-right">
+          <Link to="/forgot-password" className="text-sm text-violet-400 hover:underline">
+            Forgot password?
+          </Link>
+        </div>
 
-          <p className="text-center text-gray-300 mt-3">
-            Don’t have an account?{" "}
-            <Link to="/signup" className="text-pink-400 hover:underline">
-              Sign up
-            </Link>
-          </p>
-        </form>
-      </div>
-    </section>
+        <button className="w-full py-2.5 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold hover:opacity-90 transition">
+          Log In
+        </button>
+      </form>
+
+      <button
+  type="button"
+  onClick={() => {
+    window.location.href = "http://localhost:5000/api/auth/google";
+  }}
+  className="mt-6 w-full py-2.5 rounded-lg bg-white text-black font-semibold hover:bg-gray-200 transition"
+>
+  Continue with Google
+</button>
+
+
+      <p className="mt-6 text-sm text-gray-400 text-center">
+        Don’t have an account?{" "}
+        <Link to="/signup" className="text-violet-400 hover:underline">
+          Sign up
+        </Link>
+      </p>
+    </AuthLayout>
+    </AnimatedPage>
   );
 };
 

@@ -1,75 +1,82 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { api } from "../api/api";
+import AuthLayout from "../layouts/AuthLayout";
+import AnimatedPage from "../components/AnimatedPage";
 const Signup = () => {
-  const [show, setShow] = useState(false);
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ fullName: "", email: "", password: "" });
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    setShow(true);
-  }, []);
+  const handleChange = (e) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setError("");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const res = await api.signup(form);
+    if (res?.accessToken) navigate("/login");
+    else setError(res?.message || "Signup failed");
+  };
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-black to-purple-900 relative overflow-hidden">
-      
-      {/* Background Glow */}
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550345332-09e3acb4c97f?q=80')] bg-cover bg-center opacity-20"></div>
-      <div className="absolute inset-0 bg-gradient-to-br from-black/80 to-black/60"></div>
+    <AnimatedPage>
+    <AuthLayout
+  title="Create account"
+  subtitle="Start your fitness journey today."
+  variant="signup"
+>
 
-      {/* Signup Container */}
-      <div
-        className={`relative z-10 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl rounded-2xl p-8 transition-all duration-700 ${
-          show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-        }`}
-      >
-        <h2 className="text-4xl font-bold text-white text-center mb-6">
-          Create Account
-        </h2>
+      {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
-        <form className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          name="fullName"
+          placeholder="Full name"
+          onChange={handleChange}
+          className="w-full px-4 py-2.5 rounded-lg bg-[#151522] text-white border border-gray-700 focus:ring-2 focus:ring-violet-500 outline-none"
+        />
 
-          <div>
-            <label className="text-gray-300 text-sm">Full Name</label>
-            <input
-              type="text"
-              className="mt-1 w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-gray-400 border border-white/20 focus:border-pink-400 outline-none"
-              placeholder="Enter full name"
-            />
-          </div>
+        <input
+          name="email"
+          type="email"
+          placeholder="Email"
+          onChange={handleChange}
+          className="w-full px-4 py-2.5 rounded-lg bg-[#151522] text-white border border-gray-700 focus:ring-2 focus:ring-violet-500 outline-none"
+        />
 
-          <div>
-            <label className="text-gray-300 text-sm">Email</label>
-            <input
-              type="email"
-              className="mt-1 w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-gray-400 border border-white/20 focus:border-pink-400 outline-none"
-              placeholder="Enter email"
-            />
-          </div>
+        <input
+          name="password"
+          type="password"
+          placeholder="Password"
+          onChange={handleChange}
+          className="w-full px-4 py-2.5 rounded-lg bg-[#151522] text-white border border-gray-700 focus:ring-2 focus:ring-violet-500 outline-none"
+        />
 
-          <div>
-            <label className="text-gray-300 text-sm">Password</label>
-            <input
-              type="password"
-              className="mt-1 w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-gray-400 border border-white/20 focus:border-pink-400 outline-none"
-              placeholder="Create password"
-            />
-          </div>
+        <button className="w-full py-2.5 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold hover:opacity-90 transition">
+          Sign Up
+        </button>
+      </form>
 
-          {/* Signup Button */}
-          <button
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white font-semibold shadow-lg hover:shadow-[0_0_20px_3px_rgba(255,120,200,0.4)] transition-all hover:scale-[1.03]"
-          >
-            Sign Up
-          </button>
+      <button
+  onClick={() => {
+    window.location.href = "http://localhost:5000/api/auth/google";
+  }}
+  className="mt-6 w-full py-2.5 rounded-lg bg-white text-black font-semibold"
+>
+  Continue with Google
+</button>
 
-          <p className="text-center text-gray-300 mt-3">
-            Already have an account?{" "}
-            <Link to="/login" className="text-purple-400 hover:underline">
-              Log in
-            </Link>
-          </p>
-        </form>
-      </div>
-    </section>
+
+      <p className="mt-6 text-sm text-gray-400 text-center">
+        Already have an account?{" "}
+        <Link to="/login" className="text-violet-400 hover:underline">
+          Log in
+        </Link>
+      </p>
+    </AuthLayout>
+    </AnimatedPage>
   );
 };
 

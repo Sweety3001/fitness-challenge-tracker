@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   const [show, setShow] = useState(false);
@@ -77,8 +78,8 @@ const Hero = () => {
           <div className="mt-8 flex gap-4 flex-nowrap max-sm:flex-wrap">
 
             {/* Glow Button 1 */}
-            <a
-              href="/register"
+            <Link
+              to="/signup"
               className="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg 
               text-white font-semibold hover:scale-[1.04] transition-all duration-300 
               hover:shadow-[0_0_20px_3px_rgba(216,115,255,0.5)] 
@@ -93,11 +94,11 @@ const Hero = () => {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
               </svg>
-            </a>
+            </Link>
 
             {/* Glow Button 2 */}
-            <a
-              href="#features"
+            <Link
+              to="#features"
               className="px-6 py-3 rounded-full border border-white/30 text-white font-semibold 
               hover:bg-white/10 transition-all duration-300 hover:shadow-[0_0_20px_3px_rgba(255,255,255,0.2)] 
               flex items-center gap-2 group backdrop-blur-sm whitespace-nowrap"
@@ -111,7 +112,7 @@ const Hero = () => {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
               </svg>
-            </a>
+            </Link>
           </div>
         </div>
 

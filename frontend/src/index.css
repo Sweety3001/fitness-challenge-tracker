@@ -1,4 +1,8 @@
 @import "tailwindcss";
+html, body, #root {
+  background-color: #000000;
+  min-height: 100%;
+}
 
 @layer base {
   @keyframes blob {
@@ -27,18 +31,23 @@
   .animation-delay-4000 {
     animation-delay: 4s;
   }
-}
-
-.perspective {
-  perspective: 600px;
-}
-
-@keyframes flip {
-  0% { transform: rotateX(90deg); opacity: 0; }
-  100% { transform: rotateX(0); opacity: 1; }
-}
-
-.animate-flip {
-  animation: flip 0.35s ease-out;
-  transform-style: preserve-3d;
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.1;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.15;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0.1;
+    }
+  }
+  
+  .animate-pulse {
+    animation: pulse 4s infinite;
+  }
 }
