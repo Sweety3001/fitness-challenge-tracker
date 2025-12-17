@@ -23,6 +23,7 @@ const ProfileSetup = () => {
   // ✅ SKIP
   const handleSkip = async () => {
   await api.updateProfile({ profileCompleted: true });
+  await refreshUser();
   navigate("/dashboard");
 };
 
@@ -40,7 +41,7 @@ const ProfileSetup = () => {
 
   return (
     <AnimatedPage>
-      <div className="min-h-screen flex items-center justify-center bg-black px-4">
+      <div className="flex items-center justify-center min-h-screen px-4 bg-black">
         <div className="w-full max-w-4xl rounded-2xl bg-[#0b0b12] shadow-2xl p-10">
 
           {step === 1 && (

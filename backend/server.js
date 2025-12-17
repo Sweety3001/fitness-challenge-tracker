@@ -26,6 +26,7 @@ connectDB();
 // 🔹 ROUTES (AFTER passport init)
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/user", require("./routes/userRoutes"));
+app.use("/api/challenges", require("./routes/challengeRoutes"));
 
 // 🔹 STATIC
 app.use("/uploads", express.static("uploads"));

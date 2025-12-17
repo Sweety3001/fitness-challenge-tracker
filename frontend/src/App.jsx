@@ -13,17 +13,23 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";
 import OAuthSuccess from "./pages/OAuthSuccess";
 import HomeRedirect from "./routes/HomeRedirect";
+import ChallengePicker from "./components/challenges/ChallengePickerModal";
+import AddChallenge from "./pages/AddChallenge";
 
 function AnimatedRoutes() {
   const location = useLocation();
 
   return (
-    <div className="relative min-h-screen bg-black overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-black">
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
 
           {/* PUBLIC LANDING */}
           <Route path="/" element={<HomeRedirect />} />
+<Route path="/add-challenge" element={
+  <ProtectedRoute requireProfile>
+      <AddChallenge />
+    </ProtectedRoute>} />
 
 
 <Route path="/oauth-success" element={<OAuthSuccess />} />
@@ -74,7 +80,14 @@ function AnimatedRoutes() {
   }
 />
 
-
+<Route
+  path="/add-challenge"
+  element={
+    <ProtectedRoute>
+      <ChallengePicker />
+    </ProtectedRoute>
+  }
+/>
 
         </Routes>
       </AnimatePresence>

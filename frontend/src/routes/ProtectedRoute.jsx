@@ -2,15 +2,24 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const ProtectedRoute = ({ children, requireProfile = false }) => {
-  const { user, loading, isProfileComplete } = useAuth();
+  const { user, loading } = useAuth();
 
-  if (loading) return null;
+  // ✅ show loader while auth is resolving
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-white bg-black">
+        Loading...
+      </div>
+    );
+  }
 
+  // ✅ not logged in
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  if (requireProfile && !isProfileComplete) {
+  // ✅ profile not completed → go to setup
+  if (requireProfile && !user.profileCompleted) {
     return <Navigate to="/profile-setup" replace />;
   }
 

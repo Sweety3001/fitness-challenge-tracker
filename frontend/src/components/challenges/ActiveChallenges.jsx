@@ -1,38 +1,55 @@
-import ChallengeCard from "../dashboard/ChallengeCard";
+import { useEffect, useState } from "react";
+import { api } from "../../api/api";
+import ChallengeCard from "./ChallengeCard";
 
 const ActiveChallenges = () => {
-  // TEMP STATIC DATA (DB later)
-  const challenges = [
-    {
-      id: 1,
-      title: "10K Steps Daily",
-      type: "Steps",
-      progress: 64,
-      daysLeft: 5,
-    },
-    {
-      id: 2,
-      title: "7-Day Yoga Flow",
-      type: "Yoga",
-      progress: 40,
-      daysLeft: 3,
-    },
-  ];
+  const [challenges, setChallenges] = useState([]);
+  const [loading, setLoading] = useState(true); // ✅ FIXED
+
+  useEffect(() => {
+    console.log("ActiveChallenges mounted");
+
+    api.getMyChallenges()
+      .then((data) => {
+        console.log("MY CHALLENGES DATA:", data);
+        setChallenges(data);
+      })
+      .catch((err) => console.error("FETCH ERROR:", err))
+      .finally(() => setLoading(false)); // ✅ now defined
+  }, []);
+
+  if (loading) {
+    return <p className="text-gray-400">Loading challenges...</p>;
+  }
+
+  if (challenges.length === 0) {
+    return (
+      <div className="bg-[#0b0b12] border border-white/10 rounded-xl p-6 text-center text-gray-400">
+        You haven’t joined any challenges yet.
+      </div>
+    );
+  }
 
   return (
-    <div className="mt-10">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-white">Active Challenges</h2>
-        <button className="text-sm text-violet-400 hover:underline">
-          View all
-        </button>
-      </div>
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {challenges.map((uc) => {
+        const progressPercent = Math.min(
+          Math.round(
+            (uc.progress / uc.challenge.defaultGoal) * 100
+          ),
+          100
+        );
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {challenges.map((c) => (
-          <ChallengeCard key={c.id} {...c} />
-        ))}
-      </div>
+        return (
+          <ChallengeCard
+            key={uc._id}
+            title={uc.challenge.title}
+            type={uc.challenge.type}
+            progress={progressPercent}
+            daysLeft="—"
+          />
+        );
+      })}
     </div>
   );
 };

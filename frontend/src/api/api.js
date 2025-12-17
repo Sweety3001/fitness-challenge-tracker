@@ -40,5 +40,32 @@ export const api = {
     });
     return res.json();
   },
+  joinChallenges: async (challengeIds) => {
+  const token = localStorage.getItem("accessToken");
+
+  const res = await fetch("http://localhost:5000/api/challenges/join", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ challengeIds }),
+  });
+
+  return res.json();
+},
+getMyChallenges: async () => {
+  const token = localStorage.getItem("accessToken");
+
+  const res = await fetch("http://localhost:5000/api/challenges/my", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch my challenges");
+
+  return res.json();
+},
   
 };
