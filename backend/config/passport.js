@@ -8,6 +8,9 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: "http://localhost:5000/api/auth/google/callback",
+
+      // ✅ FORCE ACCOUNT SELECTION
+      prompt: "select_account",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -19,10 +22,10 @@ passport.use(
             email: profile.emails[0].value,
             googleId: profile.id,
             avatar: profile.photos[0]?.value,
+            profileCompleted: false,
           });
         }
 
-        // 🔴 IMPORTANT: return USER, not token
         done(null, user);
       } catch (err) {
         done(err, null);

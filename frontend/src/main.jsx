@@ -10,3 +10,5 @@ createRoot(document.getElementById('root')).render(
     </AuthProvider>
   </StrictMode>,
 )
+import { api } from "./api/api";
+window.api = api;

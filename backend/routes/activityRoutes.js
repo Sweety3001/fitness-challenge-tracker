@@ -1,0 +1,215 @@
+const express = require("express");
+const router = express.Router();
+const { protect } = require("../middleware/authMiddleware");
+
+const ActivityLog = require("../models/ActivityLog");
+const UserChallenge = require("../models/UserChallenge");
+const User = require("../models/User");
+const DailyActivity = require("../models/DailyActivity");
+const {
+  logActivity,
+  logSteps,
+} = require("../controllers/activityController");
+
+/**
+ * ===============================
+ * LOG ACTIVITY
+ * ===============================
+ */
+router.post("/log", protect, logActivity);       // non-steps
+router.post("/steps", protect, logSteps);
+/**
+ * ===============================
+ * TODAY SNAPSHOT
+ * ===============================
+ */
+
+router.get("/today", protect, async (req, res) => {
+  try {
+    const today = new Date().toISOString().split("T")[0];
+
+    const daily = await DailyActivity.findOne({
+      user: req.user._id,
+      date: today,
+    });
+
+    // If no activity yet today, return zeros
+    if (!daily) {
+      return res.json({
+        steps: 0,
+        calories: 0,
+        workoutTime: 0,
+        activeMinutes: 0,
+        streak: 0, // will be handled later
+      });
+    }
+
+    res.json({
+      steps: daily.steps,
+      calories: daily.calories,
+      workoutTime: daily.workoutMinutes,
+      activeMinutes: daily.activeMinutes,
+      streak: 0, // placeholder (we'll fix streak next)
+    });
+  } catch (err) {
+    console.error("TODAY SNAPSHOT ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch today snapshot" });
+  }
+});
+
+/**
+ * ===============================
+ * WEEKLY ACTIVITY
+ * ===============================
+ */
+router.get("/weekly", protect, async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - 6);
+
+    const records = await DailyActivity.find({
+      user: req.user._id,
+      date: {
+        $gte: startDate.toISOString().split("T")[0],
+        $lte: today.toISOString().split("T")[0],
+      },
+    });
+
+    const map = {};
+    records.forEach(r => {
+      map[r.date] = r.steps; // steps-based weekly graph
+    });
+
+    const weekly = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+
+      const key = d.toISOString().split("T")[0];
+
+      weekly.push({
+        day: d.toLocaleDateString("en-US", { weekday: "short" }),
+        steps: map[key] || 0,
+      });
+    }
+
+    res.json(weekly);
+  } catch (err) {
+    console.error("WEEKLY ACTIVITY ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch weekly activity" });
+  }
+});
+
+
+/**
+ * ===============================
+ * STREAK
+ * ===============================
+ */
+router.get("/streak", protect, async (req, res) => {
+  try {
+    const logs = await ActivityLog.find({ user: req.user._id });
+
+    if (!logs.length) {
+      return res.json({ streak: 0, badges: [] });
+    }
+
+    const logDays = new Set(logs.map(log => log.date));
+
+    let streak = 0;
+    let current = new Date();
+    current.setHours(0, 0, 0, 0);
+
+    while (true) {
+      const dayKey = current.toISOString().split("T")[0];
+      if (logDays.has(dayKey)) {
+        streak++;
+        current.setDate(current.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    const user = await User.findById(req.user._id);
+
+    if (streak >= 7 && !user.badges.includes("7-Day Streak")) {
+      user.badges.push("7-Day Streak");
+    }
+    if (streak >= 30 && !user.badges.includes("30-Day Streak")) {
+      user.badges.push("30-Day Streak");
+    }
+
+    await user.save();
+
+    res.json({ streak, badges: user.badges });
+  } catch (err) {
+    console.error("STREAK ERROR:", err);
+    res.status(500).json({ message: "Failed to calculate streak" });
+  }
+});
+
+/**
+ * ===============================
+ * CHALLENGE DETAILS + GRAPH
+ * ===============================
+ */
+router.get("/challenge/:userChallengeId", protect, async (req, res) => {
+  try {
+    const { userChallengeId } = req.params;
+
+    const uc = await UserChallenge.findOne({
+      _id: userChallengeId,
+      user: req.user._id,
+    }).populate("challenge");
+
+    if (!uc) {
+      return res.status(404).json({ message: "Challenge not found" });
+    }
+
+    const start = new Date();
+    start.setDate(start.getDate() - 6);
+    start.setHours(0, 0, 0, 0);
+
+    const logs = await ActivityLog.find({
+      user: req.user._id,
+      challenge: uc.challenge._id,
+      date: { $gte: start.toISOString().split("T")[0] },
+    });
+
+    const dailyMap = {};
+    logs.forEach(log => {
+      dailyMap[log.date] = (dailyMap[log.date] || 0) + log.value;
+    });
+
+    const graph = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().split("T")[0];
+
+      graph.push({
+        day: d.toLocaleDateString("en-US", { weekday: "short" }),
+        value: dailyMap[key] || 0,
+      });
+    }
+
+    res.json({
+      challenge: {
+        title: uc.challenge.title,
+        unit: uc.challenge.unit,
+        goal: uc.challenge.defaultGoal,
+      },
+      progress: uc.progress,
+      logs,
+      graph,
+    });
+  } catch (err) {
+    console.error("CHALLENGE DETAILS ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch challenge details" });
+  }
+});
+
+module.exports = router;

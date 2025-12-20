@@ -29,20 +29,25 @@ const AddChallenge = () => {
   };
 
   // ✅ SAVE selected challenges
-  const handleSave = async () => {
-    if (selected.length === 0) {
-      alert("Please select at least one challenge");
-      return;
-    }
+const handleSave = async () => {
+  if (selected.length === 0) {
+    alert("Please select at least one challenge");
+    return;
+  }
 
-    try {
-      await api.joinChallenges(selected);
-      navigate("/dashboard");
-    } catch (err) {
-      console.error("Join challenge error:", err);
-      alert("Failed to save challenges");
-    }
-  };
+  try {
+    const res = await api.joinChallenges(selected);
+
+    // ✅ force refresh dashboard data
+    navigate("/dashboard", { replace: true });
+  } catch (err) {
+    console.error("Join challenge error:", err);
+    alert("Failed to save challenges");
+  }
+};
+
+
+
 
   return (
     <div className="min-h-screen px-6 py-8 text-white bg-black">

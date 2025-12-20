@@ -1,18 +1,15 @@
 const mongoose = require("mongoose");
 
-const challengeSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: true }, // Yoga, Running, Steps
-    type: {
-      type: String,
-      enum: ["yoga", "running", "steps", "strength", "meditation"],
-      required: true,
-    },
-    unit: String, // steps, minutes, calories
-    defaultGoal: Number,
-    icon: String,
+const challengeSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  type: { type: String, required: true }, // steps, calories, yoga
+  unit: { type: String, required: true }, // steps, min, kcal
+  defaultGoal: { type: Number, required: true },
+  category: {
+    type: String,
+    enum: ["auto", "manual"],
+    required: true,
   },
-  { timestamps: true }
-);
+});
 
 module.exports = mongoose.model("Challenge", challengeSchema);

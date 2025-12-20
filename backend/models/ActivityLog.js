@@ -5,18 +5,20 @@ const activityLogSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
-
     challenge: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Challenge",
+      required: true,
     },
-
-    value: Number, // steps, calories, duration, etc.
-
+    value: {
+      type: Number,
+      required: true,
+    },
     date: {
-      type: Date,
-      default: Date.now,
+      type: String, // ✅ YYYY-MM-DD (IMPORTANT)
+      required: true,
     },
   },
   { timestamps: true }

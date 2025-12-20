@@ -30,6 +30,7 @@ app.use("/api/challenges", require("./routes/challengeRoutes"));
 
 // 🔹 STATIC
 app.use("/uploads", express.static("uploads"));
+app.use("/api/activity", require("./routes/activityRoutes"));
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");

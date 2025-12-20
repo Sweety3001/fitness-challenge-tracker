@@ -1,5 +1,12 @@
 const XPCard = ({ xp, level }) => {
-  const progress = (xp % 500) / 5; // percentage
+  // XP required per level
+  const XP_PER_LEVEL = 1000;
+
+  // XP earned in current level
+  const currentXP = xp % XP_PER_LEVEL;
+
+  // Progress percentage
+  const progress = (currentXP / XP_PER_LEVEL) * 100;
 
   return (
     <div className="p-5 text-white bg-gradient-to-br from-violet-600 to-purple-700 rounded-xl">
@@ -14,8 +21,11 @@ const XPCard = ({ xp, level }) => {
       </div>
 
       <p className="mt-2 text-xs opacity-80">
-        {xp % 500} / 500 XP to next level
-      </p>
+  {currentXP === 0 && xp !== 0
+    ? "🎉 Level up! Start earning XP for next level"
+    : `${currentXP} / ${XP_PER_LEVEL} XP to next level`}
+</p>
+
     </div>
   );
 };

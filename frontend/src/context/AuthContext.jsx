@@ -18,10 +18,11 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
+
   const refreshUser = async () => {
-  setLoading(true);
-  await fetchUser();
-};
+    setLoading(true);
+    await fetchUser();
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -32,20 +33,21 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = (token) => {
+  const login = async (token) => {
     localStorage.setItem("accessToken", token);
-    fetchUser();
+    setLoading(true);
+    await fetchUser();
   };
 
   const logout = () => {
     localStorage.removeItem("accessToken");
     setUser(null);
+    setLoading(false);
+    window.location.href = "/login";
   };
 
   const isProfileComplete =
-  user && user.profileCompleted === true;
-
-
+    user && user.profileCompleted === true;
 
   return (
     <AuthContext.Provider

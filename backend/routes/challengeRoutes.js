@@ -1,18 +1,23 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
+
 const { protect } = require("../middleware/authMiddleware");
 const UserChallenge = require("../models/UserChallenge");
 const Challenge = require("../models/Challenge");
 
+/**
+ * GET all available challenges (Add Challenge page)
+ */
 router.get("/", async (req, res) => {
   const challenges = await Challenge.find();
   res.json(challenges);
 });
 
+/**
+ * JOIN challenges (no duplicates)
+ */
 router.post("/join", protect, async (req, res) => {
-  console.log("BODY:", req.body);
-  console.log("USER:", req.user);
-
   try {
     const { challengeIds } = req.body;
 
@@ -20,13 +25,32 @@ router.post("/join", protect, async (req, res) => {
       return res.status(400).json({ message: "No challenges selected" });
     }
 
-    const entries = challengeIds.map((id) => ({
-      user: req.user._id,
-      challenge: id,
-      startDate: new Date(),
-    }));
+    const objectIds = challengeIds.map(
+      (id) => new mongoose.Types.ObjectId(id)
+    );
 
-    await UserChallenge.insertMany(entries);
+    const existing = await UserChallenge.find({
+      user: req.user._id,
+      challenge: { $in: objectIds },
+    });
+
+    const existingIds = existing.map((e) => e.challenge.toString());
+
+    const newEntries = objectIds
+      .filter((id) => !existingIds.includes(id.toString()))
+      .map((id) => ({
+        user: req.user._id,
+        challenge: id,
+        progress: 0,
+        isPinned: false,
+        startDate: new Date(),
+      }));
+
+    if (newEntries.length === 0) {
+      return res.json({ message: "Already added" });
+    }
+
+    await UserChallenge.insertMany(newEntries);
 
     res.json({ success: true });
   } catch (err) {
@@ -34,19 +58,28 @@ router.post("/join", protect, async (req, res) => {
     res.status(500).json({ message: "Failed to join challenges" });
   }
 });
-// ✅ GET logged-in user's joined challenges
-router.get("/my", protect, async (req, res) => {
-  try {
-    const userChallenges = await UserChallenge.find({
-      user: req.user._id,
-    }).populate("challenge");
 
-    res.json(userChallenges);
-  } catch (err) {
-    console.error("FETCH MY CHALLENGES ERROR:", err);
-    res.status(500).json({ message: "Failed to fetch user challenges" });
-  }
+/**
+ * GET user's challenges (Dashboard)
+ */
+router.get("/my", protect, async (req, res) => {
+  const challenges = await UserChallenge.find({
+    user: req.user._id,
+  }).populate("challenge");
+
+  res.json(challenges);
 });
 
+/**
+ * REMOVE a challenge
+ */
+router.delete("/:id", protect, async (req, res) => {
+  await UserChallenge.findOneAndDelete({
+    _id: req.params.id,
+    user: req.user._id,
+  });
+
+  res.json({ success: true });
+});
 
 module.exports = router;

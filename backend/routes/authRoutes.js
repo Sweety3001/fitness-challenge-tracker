@@ -4,28 +4,33 @@ const router = express.Router();
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const authController = require("../controllers/authController");
+const generateToken = require("../utils/generateToken");
 
-router.get(
-  "/google",
+// login
+router.get("/google/login",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+// signup
+router.get("/google/signup",
   passport.authenticate("google", {
     scope: ["profile", "email"],
+    prompt: "select_account",
   })
 );
+
 router.get(
   "/google/callback",
-  passport.authenticate("google", { session: false, failureRedirect: "http://localhost:5173/login" }),
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "http://localhost:5173/login",
+  }),
   (req, res) => {
-    // Create JWT
-    const token = jwt.sign(
-      { id: req.user._id },
-      process.env.JWT_ACCESS_SECRET,
-      { expiresIn: "1d" }
-    );
-
-    // Redirect to frontend with token
+    const token = generateToken(req.user._id);
     res.redirect(`http://localhost:5173/oauth-success?token=${token}`);
   }
 );
+
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
 

@@ -28,7 +28,7 @@ const Signup = () => {
   variant="signup"
 >
 
-      {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+      {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
@@ -59,17 +59,16 @@ const Signup = () => {
         </button>
       </form>
 
-      <button
+     <button
+  type="button"
   onClick={() => {
-    window.location.href = "http://localhost:5000/api/auth/google";
+    window.location.href = "http://localhost:5000/api/auth/google/signup";
   }}
-  className="mt-6 w-full py-2.5 rounded-lg bg-white text-black font-semibold"
+  className="mt-6 w-full py-2.5 rounded-lg bg-white text-black font-semibold hover:bg-gray-200 transition"
 >
-  Continue with Google
+  Sign up with Google
 </button>
-
-
-      <p className="mt-6 text-sm text-gray-400 text-center">
+      <p className="mt-6 text-sm text-center text-gray-400">
         Already have an account?{" "}
         <Link to="/login" className="text-violet-400 hover:underline">
           Log in

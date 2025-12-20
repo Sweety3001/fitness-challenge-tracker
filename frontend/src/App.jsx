@@ -13,8 +13,9 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";
 import OAuthSuccess from "./pages/OAuthSuccess";
 import HomeRedirect from "./routes/HomeRedirect";
-import ChallengePicker from "./components/challenges/ChallengePickerModal";
+
 import AddChallenge from "./pages/AddChallenge";
+import ChallengeDetails from "./pages/ChallengeDetails";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -24,17 +25,19 @@ function AnimatedRoutes() {
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
 
-          {/* PUBLIC LANDING */}
-          <Route path="/" element={<HomeRedirect />} />
-<Route path="/add-challenge" element={
-  <ProtectedRoute requireProfile>
-      <AddChallenge />
-    </ProtectedRoute>} />
+          {/* 🌟 LANDING PAGE (DEFAULT) */}
+          <Route
+            path="/"
+            element={
+              <>
+                <Navbar />
+                <LandingPage />
+                <Footer />
+              </>
+            }
+          />
 
-
-<Route path="/oauth-success" element={<OAuthSuccess />} />
-
-          {/* AUTH ROUTES */}
+          {/* 🔐 AUTH */}
           <Route
             path="/login"
             element={
@@ -52,42 +55,49 @@ function AnimatedRoutes() {
               </PublicRoute>
             }
           />
-          <Route
-  path="/landing"
-  element={
-    <>
-      <Navbar />
-      <LandingPage />
-      <Footer />
-    </>
-  }
-/>
 
+          {/* 🔁 GOOGLE OAUTH */}
+          <Route path="/oauth-success" element={<OAuthSuccess />} />
+
+          {/* 👤 PROFILE SETUP */}
           <Route
-  path="/profile-setup"
+            path="/profile-setup"
+            element={
+              <ProtectedRoute>
+                <ProfileSetup />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 📊 DASHBOARD */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute requireProfile>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 🎯 ADD CHALLENGE (ONLY ONCE) */}
+          <Route
+            path="/add-challenge"
+            element={
+              <ProtectedRoute requireProfile>
+                <AddChallenge />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+  path="/challenge/:id"
   element={
     <ProtectedRoute>
-      <ProfileSetup />
+      <ChallengeDetails />
     </ProtectedRoute>
   }
 />
-         <Route
-  path="/dashboard"
-  element={
-    <ProtectedRoute requireProfile>
-      <Dashboard />
-    </ProtectedRoute>
-  }
-/>
+<Route path="/challenges" element={<AddChallenge />} />
 
-<Route
-  path="/add-challenge"
-  element={
-    <ProtectedRoute>
-      <ChallengePicker />
-    </ProtectedRoute>
-  }
-/>
 
         </Routes>
       </AnimatePresence>
