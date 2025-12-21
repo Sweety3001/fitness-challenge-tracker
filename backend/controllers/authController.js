@@ -1,20 +1,21 @@
-const User = require("../models/User");
-const RefreshToken = require("../models/RefreshToken");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
+import User from "../models/User.js";
+import RefreshToken from "../models/RefreshToken.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 const hashToken = (token) =>
   crypto.createHash("sha256").update(token).digest("hex");
 
 /* ===================== SIGNUP ===================== */
-exports.signup = async (req, res) => {
+const signup = async (req, res) => {
   try {
     const { email, password, name } = req.body;
 
     const exists = await User.findOne({ email });
-    if (exists)
+    if (exists) {
       return res.status(400).json({ message: "Email already exists" });
+    }
 
     const hashed = await bcrypt.hash(password, 12);
 
@@ -22,7 +23,7 @@ exports.signup = async (req, res) => {
       email,
       password: hashed,
       name,
-      isProfileComplete: false, // ⭐ IMPORTANT
+      isProfileComplete: false,
     });
 
     const accessToken = jwt.sign(
@@ -45,7 +46,7 @@ exports.signup = async (req, res) => {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: false, // 🔴 keep false for localhost
+      secure: false,
       sameSite: "lax",
     });
 
@@ -65,17 +66,19 @@ exports.signup = async (req, res) => {
 };
 
 /* ===================== LOGIN ===================== */
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user)
+    if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password || "");
-    if (!isMatch)
+    if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
+    }
 
     const accessToken = jwt.sign(
       { id: user._id },
@@ -117,7 +120,7 @@ exports.login = async (req, res) => {
 };
 
 /* ===================== GOOGLE OAUTH ===================== */
-exports.googleAuthSuccess = async (req, res) => {
+const googleAuthSuccess = async (req, res) => {
   try {
     const user = req.user;
 
@@ -127,7 +130,6 @@ exports.googleAuthSuccess = async (req, res) => {
       { expiresIn: "15m" }
     );
 
-    // ⭐ SEND PROFILE STATUS
     res.redirect(
       `${process.env.FRONTEND_URL}/oauth-success?token=${accessToken}&profileComplete=${user.isProfileComplete}`
     );
@@ -135,4 +137,11 @@ exports.googleAuthSuccess = async (req, res) => {
     console.error(err);
     res.redirect(`${process.env.FRONTEND_URL}/login`);
   }
+};
+
+/* ✅ DEFAULT EXPORT (THIS FIXES EVERYTHING) */
+export default {
+  signup,
+  login,
+  googleAuthSuccess,
 };

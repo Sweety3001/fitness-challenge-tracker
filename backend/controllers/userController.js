@@ -1,6 +1,10 @@
-const User = require("../models/User");
-const { awardXP } = require("../utils/xpUtils");
-exports.getProfile = async (req, res) => {
+import User from "../models/User.js";
+import { awardXP } from "../utils/xpUtils.js";
+
+/* =====================
+   GET PROFILE
+   ===================== */
+export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
     res.json(user);
@@ -9,7 +13,10 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-exports.updateProfile = async (req, res) => {
+/* =====================
+   UPDATE PROFILE
+   ===================== */
+export const updateProfile = async (req, res) => {
   try {
     const { age, gender, fitnessLevel, goals } = req.body;
 
@@ -35,3 +42,7 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ message: "Profile update failed" });
   }
 };
+export default {
+  getProfile,
+  updateProfile,
+}

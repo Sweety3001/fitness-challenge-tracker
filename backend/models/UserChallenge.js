@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");
-
+import mongoose from "mongoose";
 const userChallengeSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -16,4 +15,5 @@ const userChallengeSchema = new mongoose.Schema({
   lastUpdated: { type: Date, default: Date.now },
 }, { timestamps: true });
 
-module.exports = mongoose.model("UserChallenge", userChallengeSchema);
+const UserChallenge = mongoose.model("UserChallenge", userChallengeSchema);
+export default UserChallenge;

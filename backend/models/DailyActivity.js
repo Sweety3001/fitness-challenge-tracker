@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");
-
+import mongoose from "mongoose";
 const dailyActivitySchema = new mongoose.Schema(
   {
     user: {
@@ -35,4 +34,5 @@ const dailyActivitySchema = new mongoose.Schema(
 // Ensure one record per user per day
 dailyActivitySchema.index({ user: 1, date: 1 }, { unique: true });
 
-module.exports = mongoose.model("DailyActivity", dailyActivitySchema);
+const DailyActivity = mongoose.model("DailyActivity", dailyActivitySchema);
+export default DailyActivity;

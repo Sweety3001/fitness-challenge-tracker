@@ -1,10 +1,9 @@
-const express = require("express");
+import express from "express";
+import mongoose from "mongoose";
 const router = express.Router();
-const mongoose = require("mongoose");
-
-const { protect } = require("../middleware/authMiddleware");
-const UserChallenge = require("../models/UserChallenge");
-const Challenge = require("../models/Challenge");
+import { protect } from "../middleware/authMiddleware.js";
+import UserChallenge from "../models/UserChallenge.js";
+import Challenge from "../models/Challenge.js";
 
 /**
  * GET all available challenges (Add Challenge page)
@@ -82,4 +81,4 @@ router.delete("/:id", protect, async (req, res) => {
   res.json({ success: true });
 });
 
-module.exports = router;
+export default router;

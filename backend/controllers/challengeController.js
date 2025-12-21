@@ -1,5 +1,5 @@
-const Challenge = require("../models/Challenge");
-const UserChallenge = require("../models/UserChallenge");
+const Challenge = require("../models/Challenge.js");
+const UserChallenge = require("../models/UserChallenge.js");
 
 /**
  * ✅ JOIN CHALLENGE (PREVENT DUPLICATES)

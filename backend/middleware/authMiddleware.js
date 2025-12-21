@@ -1,7 +1,7 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
-const protect = async (req, res, next) => {
+export const protect = async (req, res, next) => {
   try {
     let token;
 
@@ -30,5 +30,3 @@ const protect = async (req, res, next) => {
     return res.status(401).json({ message: "Token invalid" });
   }
 };
-
-module.exports = { protect };

@@ -1,12 +1,26 @@
-exports.calculateLevel = (xp) => {
+/* =====================
+   LEVEL CALCULATION
+   ===================== */
+export const calculateLevel = (xp) => {
   return Math.floor(xp / 500) + 1;
 };
 
-exports.awardXP = (user, xpToAdd) => {
-  user.xp += xpToAdd;
-  user.level = exports.calculateLevel(user.xp);
+/* =====================
+   AWARD XP + BADGES
+   ===================== */
+export const awardXP = (user, xpToAdd) => {
+  if (typeof user.xp !== "number") {
+    user.xp = 0;
+  }
 
-  // Example badges
+  if (!Array.isArray(user.badges)) {
+    user.badges = [];
+  }
+
+  user.xp += xpToAdd;
+  user.level = calculateLevel(user.xp);
+
+  // 🏅 Badges
   if (user.xp >= 500 && !user.badges.includes("Starter")) {
     user.badges.push("Starter");
   }

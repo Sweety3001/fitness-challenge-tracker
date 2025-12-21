@@ -10,12 +10,9 @@ const ActiveChallenges = () => {
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeChallenge, setActiveChallenge] = useState(null);
-            
+
   // 🔹 Today snapshot (steps, calories, etc.)
   const [todayStats, setTodayStats] = useState(null);
-
-  // 🔹 Log modal state
-  const [logType, setLogType] = useState(null);
 
   /* ===============================
      FETCH USER CHALLENGES
@@ -23,8 +20,6 @@ const ActiveChallenges = () => {
   const fetchChallenges = async () => {
     try {
       const data = await api.getMyChallenges();
-
-      // filter broken populated records
       const valid = data.filter((uc) => uc.challenge);
       setChallenges(valid);
     } catch (err) {
@@ -51,13 +46,16 @@ const ActiveChallenges = () => {
     fetchTodayStats();
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = activeChallenge ? "hidden" : "auto";
+  }, [activeChallenge]);
+
   /* ===============================
      LOG HANDLER
      =============================== */
   const handleLog = (challenge) => {
-  setActiveChallenge(challenge);
-};
-
+    setActiveChallenge(challenge);
+  };
 
   /* ===============================
      REMOVE CHALLENGE
@@ -71,22 +69,14 @@ const ActiveChallenges = () => {
     }
   };
 
-  /* ===============================
-     LOADING STATE
-     =============================== */
   if (loading) {
     return <p className="text-gray-400">Loading challenges...</p>;
   }
 
-  /* ===============================
-     EMPTY STATE
-     =============================== */
   if (challenges.length === 0) {
     return (
       <div className="bg-[#0b0b12] border border-white/10 rounded-xl p-8 text-center space-y-4">
-        <p className="text-gray-400">
-          You haven’t added any challenges yet.
-        </p>
+        <p className="text-gray-400">You haven’t added any challenges yet.</p>
         <button
           onClick={() => navigate("/challenges")}
           className="px-5 py-2 rounded-lg bg-violet-600 hover:bg-violet-700"
@@ -97,12 +87,8 @@ const ActiveChallenges = () => {
     );
   }
 
-  /* ===============================
-     RENDER
-     =============================== */
   return (
     <>
-      {/* HEADER */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">Your Challenges</h2>
         <button
@@ -113,10 +99,9 @@ const ActiveChallenges = () => {
         </button>
       </div>
 
-      {/* CHALLENGE CARDS */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         {challenges.map((uc) => {
-          const goal = uc.challenge.defaultGoal || 1;
+          const goal = uc.challenge.defaultGoal ?? 1;
 
           const progressPercent = Math.min(
             Math.round((uc.progress / goal) * 100),
@@ -132,7 +117,6 @@ const ActiveChallenges = () => {
               ucId={uc._id}
               onLog={() => handleLog(uc)}
               onRemove={removeChallenge}
-              /* ✅ Steps-only UI data */
               todayValue={
                 uc.challenge.type === "steps"
                   ? todayStats?.steps ?? 0
@@ -149,20 +133,18 @@ const ActiveChallenges = () => {
         })}
       </div>
 
-      {/* LOG MODAL */}
       {activeChallenge && (
-  <LogActivityModal
-    challengeType={activeChallenge.challenge.type}
-    challengeId={activeChallenge.challenge._id}
-    onClose={() => setActiveChallenge(null)}
-    onLogged={() => {
-      setActiveChallenge(null);
-      fetchChallenges();
-      fetchTodayStats();
-    }}
-  />
-)}
-
+        <LogActivityModal
+          challengeType={activeChallenge.challenge.type}
+          challengeId={activeChallenge._id}
+          onClose={() => setActiveChallenge(null)}
+          onLogged={() => {
+            setActiveChallenge(null);
+            fetchChallenges();
+            fetchTodayStats();
+          }}
+        />
+      )}
     </>
   );
 };

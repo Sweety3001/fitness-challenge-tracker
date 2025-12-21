@@ -1,37 +1,56 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const passport = require("passport");
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import passport from "passport";
 
-const connectDB = require("./config/db");
-require("./config/passport"); // ⬅️ passport strategy first
+import connectDB from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import challengeRoutes from "./routes/challengeRoutes.js";
+import activityRoutes from "./routes/activityRoutes.js";
+
+// 🔹 Resolve dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 🔹 Load env FIRST
+dotenv.config({ path: path.join(__dirname, ".env") });
+
+// 🔹 PROOF
+console.log("ENV LOADED:", process.env.GOOGLE_CLIENT_ID);
+
+// 🔹 LOAD PASSPORT AFTER ENV (CRITICAL FIX)
+await import("./config/passport.js");
 
 const app = express();
 
 // 🔹 CORE MIDDLEWARE
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
-
-// 🔹 PASSPORT INIT (BEFORE ROUTES)
 app.use(passport.initialize());
 
-// 🔹 DATABASE
+// 🔹 DB
 connectDB();
 
-// 🔹 ROUTES (AFTER passport init)
-app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/user", require("./routes/userRoutes"));
-app.use("/api/challenges", require("./routes/challengeRoutes"));
+// 🔹 ROUTES
+app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/challenges", challengeRoutes);
+app.use("/api/activity", activityRoutes);
 
 // 🔹 STATIC
 app.use("/uploads", express.static("uploads"));
-app.use("/api/activity", require("./routes/activityRoutes"));
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

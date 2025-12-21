@@ -1,5 +1,5 @@
-const ActivityLog = require("../models/ActivityLog");
-const UserChallenge = require("../models/UserChallenge");
+import ActivityLog from "../models/ActivityLog.js";
+import UserChallenge from "../models/UserChallenge.js";
 
 // ✅ helper
 const getToday = () => new Date().toISOString().split("T")[0];
@@ -86,7 +86,4 @@ const logSteps = async (req, res) => {
   }
 };
 
-module.exports = {
-  logActivity,
-  logSteps
-};
+export { logActivity, logSteps };

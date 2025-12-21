@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");
-
+import mongoose from "mongoose";
 const refreshTokenSchema = new mongoose.Schema({
   userId: mongoose.Schema.Types.ObjectId,
   tokenHash: String,
@@ -7,4 +6,5 @@ const refreshTokenSchema = new mongoose.Schema({
   revoked: { type: Boolean, default: false }
 });
 
-module.exports = mongoose.model("RefreshToken", refreshTokenSchema);
+const RefreshToken = mongoose.model("RefreshToken", refreshTokenSchema);
+export default RefreshToken;

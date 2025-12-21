@@ -1,15 +1,12 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const { protect } = require("../middleware/authMiddleware");
+import { protect } from "../middleware/authMiddleware.js";
 
-const ActivityLog = require("../models/ActivityLog");
-const UserChallenge = require("../models/UserChallenge");
-const User = require("../models/User");
-const DailyActivity = require("../models/DailyActivity");
-const {
-  logActivity,
-  logSteps,
-} = require("../controllers/activityController");
+import ActivityLog from "../models/ActivityLog.js";
+import UserChallenge from "../models/UserChallenge.js";
+import User from "../models/User.js";
+import DailyActivity from "../models/DailyActivity.js";
+import { logActivity, logSteps } from "../controllers/activityController.js";
 
 /**
  * ===============================
@@ -212,4 +209,4 @@ router.get("/challenge/:userChallengeId", protect, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

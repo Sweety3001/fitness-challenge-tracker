@@ -1,24 +1,26 @@
-const express = require("express");
-// import express from "express";
-const router = express.Router();
-const passport = require("passport");
-const jwt = require("jsonwebtoken");
-const authController = require("../controllers/authController");
-const generateToken = require("../utils/generateToken");
+import express from "express";
+import passport from "passport";
+import authController from "../controllers/authController.js";
+import { generateToken } from "../utils/generateToken.js";
 
-// login
-router.get("/google/login",
+const router = express.Router();
+
+// 🔹 Google login
+router.get(
+  "/google/login",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-// signup
-router.get("/google/signup",
+// 🔹 Google signup
+router.get(
+  "/google/signup",
   passport.authenticate("google", {
     scope: ["profile", "email"],
     prompt: "select_account",
   })
 );
 
+// 🔹 Google callback
 router.get(
   "/google/callback",
   passport.authenticate("google", {
@@ -27,11 +29,14 @@ router.get(
   }),
   (req, res) => {
     const token = generateToken(req.user._id);
-    res.redirect(`http://localhost:5173/oauth-success?token=${token}`);
+    res.redirect(
+      `http://localhost:5173/oauth-success?token=${token}`
+    );
   }
 );
 
+// 🔹 Email / password auth
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
 
-module.exports = router;
+export default router;
