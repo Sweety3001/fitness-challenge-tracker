@@ -1,11 +1,71 @@
+import axios from "axios";
+
 const API_BASE_URL = "http://localhost:5000/api";
 
+/* =======================
+   AXIOS INSTANCE
+======================= */
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+/* =======================
+   FETCH HEADERS (legacy)
+======================= */
 const getHeaders = () => ({
   "Content-Type": "application/json",
   Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
 });
 
 export const api = {
+  /* =======================
+     AUTH
+  ======================= */
+  login: async (data) => {
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || "Login failed");
+    }
+    
+    return res.json();
+  },
+  
+  signup: async (data) => {
+    const res = await fetch(`${API_BASE_URL}/auth/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || "Signup failed");
+    }
+    
+    return res.json();
+  },
+
   /* =======================
      PROFILE
   ======================= */
@@ -14,6 +74,16 @@ export const api = {
       headers: getHeaders(),
     });
     if (!res.ok) throw new Error("Failed to fetch profile");
+    return res.json();
+  },
+  
+  updateProfile: async (data) => {
+    const res = await fetch(`${API_BASE_URL}/user/me`, {
+      method: "PATCH",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Profile update failed");
     return res.json();
   },
 
@@ -26,12 +96,7 @@ export const api = {
       headers: getHeaders(),
       body: JSON.stringify({ challengeIds }),
     });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || "Failed to join challenges");
-    }
-
+    if (!res.ok) throw new Error("Failed to join challenges");
     return res.json();
   },
 
@@ -39,7 +104,6 @@ export const api = {
     const res = await fetch(`${API_BASE_URL}/challenges/my`, {
       headers: getHeaders(),
     });
-
     if (!res.ok) throw new Error("Failed to fetch challenges");
     return res.json();
   },
@@ -52,41 +116,32 @@ export const api = {
         headers: getHeaders(),
       }
     );
-
     if (!res.ok) throw new Error("Failed to remove challenge");
     return res.json();
   },
 
   /* =======================
-     ACTIVITY
+     ACTIVITY (AXIOS)
   ======================= */
-  logActivity: async ({ challengeType, value }) => {
-    const res = await fetch(`${API_BASE_URL}/activity/log`, {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify({ challengeType, value }),
-    });
+  logActivity: ({ challengeId, value }) =>
+    axiosInstance.post("/activity/log", { challengeId, value }),
 
-    if (!res.ok) throw new Error("Failed to log activity");
-    return res.json();
-  },
-
-  getWeeklyActivity: async () => {
-  const res = await fetch(`${API_BASE_URL}/activity/weekly`, {
-    headers: getHeaders(),
-  });
-
-  if (!res.ok) throw new Error("Failed to fetch weekly activity");
-  return res.json();
-},
-
+  logSteps: ({ challengeId, steps }) =>
+    axiosInstance.post("/activity/steps", { challengeId, steps }),
 
   getTodaySnapshot: async () => {
     const res = await fetch(`${API_BASE_URL}/activity/today`, {
       headers: getHeaders(),
     });
-
     if (!res.ok) throw new Error("Failed to fetch today snapshot");
+    return res.json();
+  },
+
+  getWeeklyActivity: async () => {
+    const res = await fetch(`${API_BASE_URL}/activity/weekly`, {
+      headers: getHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to fetch weekly activity");
     return res.json();
   },
 
@@ -94,25 +149,21 @@ export const api = {
     const res = await fetch(`${API_BASE_URL}/activity/streak`, {
       headers: getHeaders(),
     });
-
     if (!res.ok) throw new Error("Failed to fetch streak");
     return res.json();
   },
 
   /* =======================
-     CHALLENGE DETAILS + GRAPH
-     (SINGLE SOURCE OF TRUTH)
+     CHALLENGE DETAILS
   ======================= */
   getChallengeDetails: async (userChallengeId) => {
     const res = await fetch(
       `${API_BASE_URL}/activity/challenge/${userChallengeId}`,
-      {
-        headers: getHeaders(),
-      }
+      { headers: getHeaders() }
     );
-
     if (!res.ok) throw new Error("Failed to fetch challenge details");
-    return res.json(); 
-    // returns: { challenge, data: [{day, value}] }
+    return res.json();
   },
 };
+
+console.log("api ready", api);

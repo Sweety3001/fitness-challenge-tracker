@@ -6,6 +6,7 @@ import ActivityLog from "../models/ActivityLog.js";
 import UserChallenge from "../models/UserChallenge.js";
 import User from "../models/User.js";
 import DailyActivity from "../models/DailyActivity.js";
+import Challenge from "../models/Challenge.js";
 import { logActivity, logSteps } from "../controllers/activityController.js";
 
 /**
@@ -14,13 +15,13 @@ import { logActivity, logSteps } from "../controllers/activityController.js";
  * ===============================
  */
 router.post("/log", protect, logActivity);       // non-steps
-router.post("/steps", protect, logSteps);
+router.post("/steps", protect, logSteps);        // steps-specific
+
 /**
  * ===============================
  * TODAY SNAPSHOT
  * ===============================
  */
-
 router.get("/today", protect, async (req, res) => {
   try {
     const today = new Date().toISOString().split("T")[0];
@@ -67,7 +68,22 @@ router.get("/weekly", protect, async (req, res) => {
     const startDate = new Date(today);
     startDate.setDate(startDate.getDate() - 6);
 
-    const records = await DailyActivity.find({
+    // Get all challenges the user has joined
+    const userChallenges = await UserChallenge.find({
+      user: req.user._id
+    }).populate('challenge');
+
+    // Get activity logs for the past week
+    const logs = await ActivityLog.find({
+      user: req.user._id,
+      date: {
+        $gte: startDate.toISOString().split("T")[0],
+        $lte: today.toISOString().split("T")[0],
+      },
+    }).populate('challenge');
+
+    // Get daily activity records (for steps data)
+    const dailyRecords = await DailyActivity.find({
       user: req.user._id,
       date: {
         $gte: startDate.toISOString().split("T")[0],
@@ -75,25 +91,68 @@ router.get("/weekly", protect, async (req, res) => {
       },
     });
 
-    const map = {};
-    records.forEach(r => {
-      map[r.date] = r.steps; // steps-based weekly graph
+    // Create a map of challenges by ID
+    const challengeMap = {};
+    userChallenges.forEach(uc => {
+      if (uc.challenge) {
+        challengeMap[uc.challenge._id.toString()] = {
+          title: uc.challenge.title,
+          unit: uc.challenge.unit,
+          type: uc.challenge.type,
+          data: {}
+        };
+      }
     });
 
-    const weekly = [];
+    // Initialize data for each day for each challenge
+    const days = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-
-      const key = d.toISOString().split("T")[0];
-
-      weekly.push({
-        day: d.toLocaleDateString("en-US", { weekday: "short" }),
-        steps: map[key] || 0,
+      const dayStr = d.toISOString().split("T")[0];
+      days.push({
+        date: dayStr,
+        day: d.toLocaleDateString("en-US", { weekday: "short" })
+      });
+      
+      // Initialize challenge data for this day
+      Object.keys(challengeMap).forEach(challengeId => {
+        challengeMap[challengeId].data[dayStr] = 0;
       });
     }
 
-    res.json(weekly);
+    // Aggregate activity logs by challenge and day
+    logs.forEach(log => {
+      const challengeId = log.challenge._id.toString();
+      if (challengeMap[challengeId]) {
+        challengeMap[challengeId].data[log.date] = 
+          (challengeMap[challengeId].data[log.date] || 0) + log.value;
+      }
+    });
+
+    // Add steps data separately
+    const stepsData = {};
+    dailyRecords.forEach(record => {
+      stepsData[record.date] = record.steps || 0;
+    });
+
+    // Prepare the response data
+    const weeklyData = days.map(({ date, day }) => {
+      const result = { day };
+      
+      // Add data for each challenge
+      Object.keys(challengeMap).forEach(challengeId => {
+        const challenge = challengeMap[challengeId];
+        result[challenge.title] = challenge.data[date] || 0;
+      });
+      
+      // Add steps data
+      result['Steps'] = stepsData[date] || 0;
+      
+      return result;
+    });
+
+    res.json(weeklyData);
   } catch (err) {
     console.error("WEEKLY ACTIVITY ERROR:", err);
     res.status(500).json({ message: "Failed to fetch weekly activity" });

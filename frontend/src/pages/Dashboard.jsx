@@ -3,15 +3,131 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 import DashboardHeader from "../components/dashboard/DashboardHeader";
-import XPCard from "../components/dashboard/XPCard";
-import Badges from "../components/dashboard/Badges";
 import TodayStats from "../components/challenges/TodayStats";
 import ActiveChallenges from "../components/challenges/ActiveChallenges";
 import WeeklyProgressChart from "../components/charts/WeeklyProgressChart";
-import ProgressCard from "../components/dashboard/ProgressCard";
 
 import { api } from "../api/api";
 import { getDailyMessage } from "../utils/getDailyMessage";
+
+// Achievements Component
+const Achievements = () => {
+  const { user } = useAuth();
+
+  // All possible badges
+  const ALL_BADGES = [
+    {
+      id: "first_challenge",
+      title: "First Challenge",
+      icon: "🎯",
+      description: "Join your first challenge"
+    },
+    {
+      id: "steps_10k",
+      title: "10K Steps Day",
+      icon: "👟",
+      description: "Walk 10,000 steps in a single day"
+    },
+    {
+      id: "streak_7",
+      title: "7-Day Streak",
+      icon: "🔥",
+      description: "Stay active for 7 days straight"
+    },
+    {
+      id: "streak_30",
+      title: "30-Day Streak",
+      icon: "🏆",
+      description: "Maintain activity for 30 days straight"
+    },
+    {
+      id: "marathon_runner",
+      title: "Marathon Runner",
+      icon: "🏃",
+      description: "Reach 10,000 steps in a day"
+    },
+    {
+      id: "early_bird",
+      title: "Early Bird",
+      icon: "🌅",
+      description: "Log activity before 8 AM"
+    },
+    {
+      id: "night_owl",
+      title: "Night Owl",
+      icon: "🌙",
+      description: "Log activity after 10 PM"
+    },
+    {
+      id: "calorie_crusher",
+      title: "Calorie Crusher",
+      icon: "💪",
+      description: "Burn 500 calories in a day"
+    }
+  ];
+
+  // Check if user has earned a specific badge
+  const hasBadge = (badgeId) => {
+    return user?.badges?.includes(badgeId) || false;
+  };
+
+  return (
+    <div className="bg-[#0b0b12] border border-white/10 rounded-2xl p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold">Achievements</h3>
+        <span className="text-xs text-gray-400">
+          {user?.badges?.length || 0} / {ALL_BADGES.length} unlocked
+        </span>
+      </div>
+      
+      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
+        {ALL_BADGES.map((badge) => {
+          const earned = hasBadge(badge.id);
+          return (
+            <div 
+              key={badge.id}
+              className="relative group"
+            >
+              <div className={`
+                flex flex-col items-center justify-center p-2 rounded-xl transition-all
+                ${earned 
+                  ? 'bg-violet-600/10 ring-1 ring-violet-500/30' 
+                  : 'grayscale opacity-40 bg-white/5'}
+              `}>
+                <div className={`
+                  flex items-center justify-center w-12 h-12 rounded-full text-xl
+                  ${earned 
+                    ? 'text-violet-400' 
+                    : 'text-gray-500'}
+                `}>
+                  {badge.icon}
+                </div>
+                {!earned && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-5 h-5 bg-black/50 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-2.5 h-2.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black/80 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                <div className="font-medium">{badge.title}</div>
+                {!earned && (
+                  <div className="text-gray-300 text-xs">How to unlock: {badge.description}</div>
+                )}
+              </div>
+              <div className="mt-2 text-xs text-center text-gray-400 truncate w-full">
+                {badge.title}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
@@ -80,25 +196,12 @@ useEffect(() => {
       <DashboardHeader
         message={message}
         streak={user.streak ?? 0}
-        xp={user.xp ?? 0}
-        level={user.level ?? 1}
       />
-      <div className="flex justify-end">
- 
-
-</div>
 
       <ActiveChallenges />
 
-      {/* XP + BADGES */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-  <ProgressCard
-    level={user.level ?? 1}
-    xp={user.xp ?? 0}
-  />
-  <Badges badges={user.badges ?? []} />
-</div>
-
+      {/* ACHIEVEMENTS */}
+      <Achievements />
 
       {/* TODAY STATS */}
       <TodayStats stats={todayStats} loading={todayLoading} />

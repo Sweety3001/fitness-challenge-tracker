@@ -23,7 +23,7 @@ const signup = async (req, res) => {
       email,
       password: hashed,
       name,
-      isProfileComplete: false,
+      profileCompleted: false,
     });
 
     const accessToken = jwt.sign(
@@ -56,7 +56,7 @@ const signup = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        isProfileComplete: user.isProfileComplete,
+        profileCompleted: user.profileCompleted,
       },
     });
   } catch (err) {
@@ -110,7 +110,7 @@ const login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        isProfileComplete: user.isProfileComplete,
+        profileCompleted: user.profileCompleted,
       },
     });
   } catch (error) {
@@ -131,7 +131,7 @@ const googleAuthSuccess = async (req, res) => {
     );
 
     res.redirect(
-      `${process.env.FRONTEND_URL}/oauth-success?token=${accessToken}&profileComplete=${user.isProfileComplete}`
+      `${process.env.FRONTEND_URL}/oauth-success?token=${accessToken}&profileComplete=${user.profileCompleted}`
     );
   } catch (err) {
     console.error(err);

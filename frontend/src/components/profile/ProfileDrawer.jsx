@@ -5,6 +5,27 @@ const ProfileDrawer = ({ open, onClose }) => {
 
   if (!open) return null;
 
+  // Calculate XP progress
+  const XP_PER_LEVEL = 500;
+  const currentXP = user?.xp ?? 0;
+  const currentLevel = user?.level ?? 1;
+  const nextLevelXP = currentLevel * XP_PER_LEVEL;
+  const xpProgress = Math.min((currentXP / nextLevelXP) * 100, 100);
+
+  // Badge definitions with icons
+  const badgeIcons = {
+    "7-Day Streak": "🔥",
+    "30-Day Streak": "🏆",
+    "First Challenge": "🎯",
+    "Marathon Runner": "🏃",
+    "Early Bird": "🌅",
+    "Night Owl": "🌙"
+  };
+
+  const getUserBadges = () => {
+    return user?.badges ?? [];
+  };
+
   return (
     <>
       {/* OVERLAY */}
@@ -14,55 +35,79 @@ const ProfileDrawer = ({ open, onClose }) => {
       />
 
       {/* DRAWER */}
-      <div className="fixed top-0 right-0 z-50 w-full max-w-sm h-full bg-[#0b0b12] border-l border-white/10 p-6 flex flex-col">
-
+      <div className="fixed top-0 right-0 z-50 w-full max-w-xs h-full bg-[#0b0b12] border-l border-white/10 p-5 flex flex-col">
         {/* HEADER */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold">Your Profile</h2>
+          <h2 className="text-lg font-semibold">Profile</h2>
           <button
             onClick={onClose}
-            className="text-xl text-gray-400 hover:text-white"
+            className="text-lg text-gray-400 hover:text-white"
           >
             ✕
           </button>
         </div>
 
         {/* USER INFO */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="flex items-center justify-center text-lg font-bold rounded-full w-14 h-14 bg-violet-600">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center justify-center text-base font-bold rounded-full w-12 h-12 bg-violet-600">
             {user?.name?.[0] || "U"}
           </div>
 
           <div>
             <p className="font-semibold">{user?.name}</p>
-            <p className="text-sm text-gray-400">{user?.email}</p>
+            <p className="text-xs text-gray-400 truncate max-w-[120px]">
+              {user?.email}
+            </p>
           </div>
         </div>
 
-        {/* STATS */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="p-4 border rounded-lg border-white/10">
-            <p className="text-xs text-gray-400">Streak</p>
-            <p className="text-lg font-semibold">🔥 {user?.streak ?? 0}</p>
+        {/* LEVEL & XP */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between text-xs mb-2">
+            <span className="text-gray-400">Level {currentLevel}</span>
+            <span className="text-gray-400">{currentXP}/{nextLevelXP} XP</span>
           </div>
+          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-violet-500 to-purple-600"
+              style={{ width: `${xpProgress}%` }}
+            />
+          </div>
+        </div>
 
-          <div className="p-4 border rounded-lg border-white/10">
-            <p className="text-xs text-gray-400">Level</p>
-            <p className="text-lg font-semibold">
-              {user?.level ?? 1}
-            </p>
+        {/* BADGES */}
+        <div className="mb-6">
+          <p className="text-xs text-gray-400 mb-2">Badges</p>
+          <div className="flex flex-wrap gap-2">
+            {getUserBadges().length > 0 ? (
+              getUserBadges().map((badge, i) => (
+                <div 
+                  key={i}
+                  className="relative group"
+                >
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-violet-600/20 text-violet-400 text-sm">
+                    {badgeIcons[badge] || "🏅"}
+                  </div>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black/80 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                    {badge}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-gray-500 italic">No badges yet</p>
+            )}
           </div>
         </div>
 
         {/* ACTIONS */}
         <div className="mt-auto space-y-3">
-          <button className="w-full px-4 py-2 transition rounded-lg bg-white/10 hover:bg-white/20">
+          <button className="w-full px-4 py-2 text-sm transition rounded-lg bg-white/10 hover:bg-white/20">
             Edit Profile
           </button>
 
           <button
             onClick={logout}
-            className="w-full px-4 py-2 text-red-400 transition border rounded-lg border-red-400/30 hover:bg-red-400/10"
+            className="w-full px-4 py-2 text-sm text-red-400 transition border rounded-lg border-red-400/30 hover:bg-red-400/10"
           >
             Logout
           </button>
