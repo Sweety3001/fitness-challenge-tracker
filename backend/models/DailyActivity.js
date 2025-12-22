@@ -23,10 +23,10 @@ const dailyActivitySchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    activeMinutes: {
-      type: Number,
-      default: 0,
-    },
+    badges:{
+      type: [String],
+      default: []
+    }
   },
   { timestamps: true }
 );

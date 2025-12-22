@@ -1,7 +1,9 @@
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const ProfileDrawer = ({ open, onClose }) => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   if (!open) return null;
 
@@ -12,18 +14,14 @@ const ProfileDrawer = ({ open, onClose }) => {
   const nextLevelXP = currentLevel * XP_PER_LEVEL;
   const xpProgress = Math.min((currentXP / nextLevelXP) * 100, 100);
 
-  // Badge definitions with icons
-  const badgeIcons = {
-    "7-Day Streak": "🔥",
-    "30-Day Streak": "🏆",
-    "First Challenge": "🎯",
-    "Marathon Runner": "🏃",
-    "Early Bird": "🌅",
-    "Night Owl": "🌙"
+  const handleEditProfile = () => {
+    navigate("/profile");
+    onClose();
   };
 
-  const getUserBadges = () => {
-    return user?.badges ?? [];
+  const handleLogout = () => {
+    logout();
+    onClose();
   };
 
   return (
@@ -79,17 +77,17 @@ const ProfileDrawer = ({ open, onClose }) => {
         <div className="mb-6">
           <p className="text-xs text-gray-400 mb-2">Badges</p>
           <div className="flex flex-wrap gap-2">
-            {getUserBadges().length > 0 ? (
-              getUserBadges().map((badge, i) => (
+            {user?.badges && user.badges.length > 0 ? (
+              user.badges.map((badgeKey, i) => (
                 <div 
                   key={i}
                   className="relative group"
                 >
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-violet-600/20 text-violet-400 text-sm">
-                    {badgeIcons[badge] || "🏅"}
+                    🏅
                   </div>
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black/80 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                    {badge}
+                    {badgeKey}
                   </div>
                 </div>
               ))
@@ -101,12 +99,15 @@ const ProfileDrawer = ({ open, onClose }) => {
 
         {/* ACTIONS */}
         <div className="mt-auto space-y-3">
-          <button className="w-full px-4 py-2 text-sm transition rounded-lg bg-white/10 hover:bg-white/20">
+          <button 
+            onClick={handleEditProfile}
+            className="w-full px-4 py-2 text-sm transition rounded-lg bg-white/10 hover:bg-white/20"
+          >
             Edit Profile
           </button>
 
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="w-full px-4 py-2 text-sm text-red-400 transition border rounded-lg border-red-400/30 hover:bg-red-400/10"
           >
             Logout

@@ -100,13 +100,14 @@ export const api = {
     return res.json();
   },
 
-  getMyChallenges: async () => {
-    const res = await fetch(`${API_BASE_URL}/challenges/my`, {
-      headers: getHeaders(),
-    });
-    if (!res.ok) throw new Error("Failed to fetch challenges");
-    return res.json();
-  },
+ getMyChallenges: async () => {
+  const res = await fetch(`${API_BASE_URL}/challenges/my`, {
+    headers: getHeaders(),
+    cache: "no-store",     // 🔥 IMPORTANT
+  });
+  if (!res.ok) throw new Error("Failed to fetch challenges");
+  return res.json();
+},
 
   removeChallenge: async (userChallengeId) => {
     const res = await fetch(
@@ -123,27 +124,31 @@ export const api = {
   /* =======================
      ACTIVITY (AXIOS)
   ======================= */
-  logActivity: ({ challengeId, value }) =>
-    axiosInstance.post("/activity/log", { challengeId, value }),
+  logActivity: async ({ challengeId, value }) => {
+    const response = await axiosInstance.post("/activity/log", { challengeId, value });
+    return response.data;
+  },
 
-  logSteps: ({ challengeId, steps }) =>
-    axiosInstance.post("/activity/steps", { challengeId, steps }),
+  logSteps: async ({ challengeId, steps }) => {
+    const response = await axiosInstance.post("/activity/steps", { challengeId, steps });
+    return response.data;
+  },
 
   getTodaySnapshot: async () => {
-    const res = await fetch(`${API_BASE_URL}/activity/today`, {
-      headers: getHeaders(),
-    });
-    if (!res.ok) throw new Error("Failed to fetch today snapshot");
-    return res.json();
-  },
+  const res = await fetch(`${API_BASE_URL}/activity/today`, {
+    headers: getHeaders(),
+    cache: "no-store",     // 🔥 IMPORTANT
+  });
+  if (!res.ok) throw new Error("Failed to fetch today snapshot");
+  return res.json();
+},
 
-  getWeeklyActivity: async () => {
-    const res = await fetch(`${API_BASE_URL}/activity/weekly`, {
-      headers: getHeaders(),
-    });
-    if (!res.ok) throw new Error("Failed to fetch weekly activity");
-    return res.json();
-  },
+
+getWeeklyActivity: async () => {
+  const response = await axiosInstance.get("/activity/weekly");
+  return response.data;
+},
+
 
   getStreak: async () => {
     const res = await fetch(`${API_BASE_URL}/activity/streak`, {

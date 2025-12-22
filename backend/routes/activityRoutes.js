@@ -16,6 +16,8 @@ import { logActivity, logSteps } from "../controllers/activityController.js";
  */
 router.post("/log", protect, logActivity);       // non-steps
 router.post("/steps", protect, logSteps);        // steps-specific
+// routes/userRoutes.js
+// router.put("/profile", protect, updateProfile);
 
 /**
  * ===============================
@@ -37,7 +39,6 @@ router.get("/today", protect, async (req, res) => {
         steps: 0,
         calories: 0,
         workoutTime: 0,
-        activeMinutes: 0,
         streak: 0, // will be handled later
       });
     }
@@ -46,7 +47,6 @@ router.get("/today", protect, async (req, res) => {
       steps: daily.steps,
       calories: daily.calories,
       workoutTime: daily.workoutMinutes,
-      activeMinutes: daily.activeMinutes,
       streak: 0, // placeholder (we'll fix streak next)
     });
   } catch (err) {
@@ -122,19 +122,35 @@ router.get("/weekly", protect, async (req, res) => {
     }
 
     // Aggregate activity logs by challenge and day
-    logs.forEach(log => {
-      const challengeId = log.challenge._id.toString();
-      if (challengeMap[challengeId]) {
-        challengeMap[challengeId].data[log.date] = 
-          (challengeMap[challengeId].data[log.date] || 0) + log.value;
-      }
-    });
+logs.forEach(log => {
+  // ✅ skip broken logs
+  if (!log.challenge || !log.challenge._id) return;
+
+  const challengeId = log.challenge._id.toString();
+
+  // ✅ normalize date
+  const logDate = log.date
+    ? new Date(log.date).toISOString().split("T")[0]
+    : null;
+
+  if (!logDate) return;
+
+  if (challengeMap[challengeId]) {
+    challengeMap[challengeId].data[logDate] =
+      (challengeMap[challengeId].data[logDate] || 0) + log.value;
+  }
+});
+
+
 
     // Add steps data separately
     const stepsData = {};
     dailyRecords.forEach(record => {
-      stepsData[record.date] = record.steps || 0;
-    });
+  if (!record.date) return;
+
+  const date = new Date(record.date).toISOString().split("T")[0];
+  stepsData[date] = record.steps || 0;
+});
 
     // Prepare the response data
     const weeklyData = days.map(({ date, day }) => {
@@ -151,6 +167,12 @@ router.get("/weekly", protect, async (req, res) => {
       
       return result;
     });
+    //////////////////
+    console.log("WEEKLY DEBUG", {
+  days,
+  challenges: Object.keys(challengeMap),
+  sampleLog: logs[0]
+});
 
     res.json(weeklyData);
   } catch (err) {
@@ -191,11 +213,11 @@ router.get("/streak", protect, async (req, res) => {
 
     const user = await User.findById(req.user._id);
 
-    if (streak >= 7 && !user.badges.includes("7-Day Streak")) {
-      user.badges.push("7-Day Streak");
+    if (streak >= 7 && !(user.badges || []).includes("streak_7")) {
+      user.badges.push("streak_7");
     }
-    if (streak >= 30 && !user.badges.includes("30-Day Streak")) {
-      user.badges.push("30-Day Streak");
+    if (streak >= 30 && !(user.badges || []).includes("streak_30")) {
+      user.badges.push("streak_30");
     }
 
     await user.save();

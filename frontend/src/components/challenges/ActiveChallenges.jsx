@@ -30,19 +30,24 @@ const ActiveChallenges = () => {
   /* ===============================
      FETCH TODAY SNAPSHOT
   =============================== */
-  const fetchTodayStats = async () => {
-    try {
-      const data = await api.getTodaySnapshot();
-      setTodayStats(data);
-    } catch (err) {
-      console.error("FETCH TODAY STATS ERROR:", err);
-    }
-  };
+  // const fetchTodayStats = async () => {
+  //   try {
+  //     const data = await api.getTodaySnapshot();
+  //     setTodayStats(data);
+  //   } catch (err) {
+  //     console.error("FETCH TODAY STATS ERROR:", err);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchChallenges();
+  //   fetchTodayStats();
+  // }, []);
 
   useEffect(() => {
-    fetchChallenges();
-    fetchTodayStats();
-  }, []);
+  fetchChallenges();
+  // fetchTodayStats();
+}, [new Date().toDateString()]);
 
   useEffect(() => {
     document.body.style.overflow = activeChallenge ? "hidden" : "auto";
@@ -74,7 +79,7 @@ const ActiveChallenges = () => {
 
   if (loading) return <div className="bg-[#0b0b12] border border-white/10 rounded-xl p-8 text-center">
     <div className="flex justify-center">
-      <div className="w-6 h-6 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="w-6 h-6 border-2 rounded-full border-violet-500 border-t-transparent animate-spin"></div>
     </div>
     <p className="mt-3 text-gray-400">Loading your challenges...</p>
   </div>;
@@ -106,7 +111,6 @@ const ActiveChallenges = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold">Your Challenges</h2>
-          <p className="text-sm text-gray-400 mt-1">Track your progress and stay motivated</p>
         </div>
         <button
           onClick={() => navigate("/challenges")}
@@ -120,12 +124,13 @@ const ActiveChallenges = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {challenges.map((uc) => {
-          const goal = uc.challenge.defaultGoal ?? 1;
-          const progressPercent = Math.min(
-            Math.round((uc.progress / goal) * 100),
-            100
-          );
+        {/* {challenges.map((uc) => {
+          // const goal = uc.challenge.defaultGoal ?? 1;
+          // const progressPercent = Math.min(
+          //   Math.round((uc.progress / goal) * 100),
+          //   100
+          // );
+          const progressPercent = uc.progress ?? 0;
 
           return (
             <ChallengeCard
@@ -149,7 +154,27 @@ const ActiveChallenges = () => {
               unit={uc.challenge.type === "steps" ? "steps" : undefined}
             />
           );
-        })}
+        })} */}
+        {challenges.map((uc) => {
+  const progressPercent = uc.progress;
+
+  return (
+    <ChallengeCard
+      key={uc._id}
+      title={uc.challenge.title}
+      type={uc.challenge.type}
+      progress={progressPercent}
+      completedToday={uc.completedToday}
+      ucId={uc._id}
+      onLog={() => handleLog(uc)}
+      onRemove={removeChallenge}
+      todayValue={uc.todayValue}
+      target={uc.challenge.defaultGoal}
+      unit={uc.challenge.unit}
+    />
+  );
+})}
+
       </div>
 
       {activeChallenge && (
@@ -160,7 +185,7 @@ const ActiveChallenges = () => {
     onLogged={() => {
       setActiveChallenge(null);
       fetchChallenges();
-      fetchTodayStats();
+      // fetchTodayStats();
     }}
   />
 )}

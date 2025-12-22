@@ -1,6 +1,7 @@
 import { useAuth } from "../../context/AuthContext";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ProfileDrawer from "../profile/ProfileDrawer";
 
 const DashboardHeader = ({ message, streak }) => {
   const { user, logout } = useAuth();
@@ -77,7 +78,7 @@ const DashboardHeader = ({ message, streak }) => {
   const nextLevelXP = currentLevel * XP_PER_LEVEL;
   const xpProgress = Math.min((currentXP / nextLevelXP) * 100, 100);
 
-  // All possible badges
+  // All possible badges - using canonical badge keys
   const ALL_BADGES = [
     {
       id: "first_challenge",
@@ -86,7 +87,7 @@ const DashboardHeader = ({ message, streak }) => {
       description: "Join your first challenge"
     },
     {
-      id: "steps_10k",
+      id: "steps_10k_day",
       title: "10K Steps Day",
       icon: "👟",
       description: "Walk 10,000 steps in a single day"
@@ -104,10 +105,16 @@ const DashboardHeader = ({ message, streak }) => {
       description: "Maintain activity for 30 days straight"
     },
     {
+      id: "calorie_crusher",
+      title: "Calorie Crusher",
+      icon: "💪",
+      description: "Burn 500 calories in a day"
+    },
+    {
       id: "marathon_runner",
       title: "Marathon Runner",
       icon: "🏃",
-      description: "Reach 10,000 steps in a day"
+      description: "Complete any challenge"
     },
     {
       id: "early_bird",
@@ -120,12 +127,6 @@ const DashboardHeader = ({ message, streak }) => {
       title: "Night Owl",
       icon: "🌙",
       description: "Log activity after 10 PM"
-    },
-    {
-      id: "calorie_crusher",
-      title: "Calorie Crusher",
-      icon: "💪",
-      description: "Burn 500 calories in a day"
     }
   ];
 
@@ -134,18 +135,18 @@ const DashboardHeader = ({ message, streak }) => {
     return user?.badges?.includes(badgeId) || false;
   };
 
-  const handleLogout = () => {
-    logout();
-    setOpenProfile(false);
-  };
+  // Filter earned badges for avatar popup
+  const earnedBadges = ALL_BADGES.filter(badge => hasBadge(badge.id));
 
   const handleEditProfile = () => {
     navigate("/profile");
     setOpenProfile(false);
   };
 
-  // Filter earned badges for avatar popup
-  const earnedBadges = ALL_BADGES.filter(badge => hasBadge(badge.id));
+  const handleLogout = () => {
+    logout();
+    setOpenProfile(false);
+  };
 
   return (
     <>
@@ -264,7 +265,7 @@ const DashboardHeader = ({ message, streak }) => {
                 </div>
 
                 {/* ACTIONS */}
-                <div className="p-4 pt-0 space-y-2">
+                <div className="p-4 pt-0 space-y-2 border-t border-white/10">
                   <button 
                     onClick={handleEditProfile}
                     className="w-full px-3 py-2 text-sm text-white transition rounded-lg bg-white/10 hover:bg-white/20"

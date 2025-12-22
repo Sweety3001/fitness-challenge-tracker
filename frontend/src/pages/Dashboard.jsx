@@ -14,7 +14,7 @@ import { getDailyMessage } from "../utils/getDailyMessage";
 const Achievements = () => {
   const { user } = useAuth();
 
-  // All possible badges
+  // All possible badges - using canonical badge keys
   const ALL_BADGES = [
     {
       id: "first_challenge",
@@ -23,7 +23,7 @@ const Achievements = () => {
       description: "Join your first challenge"
     },
     {
-      id: "steps_10k",
+      id: "steps_10k_day",
       title: "10K Steps Day",
       icon: "👟",
       description: "Walk 10,000 steps in a single day"
@@ -41,10 +41,16 @@ const Achievements = () => {
       description: "Maintain activity for 30 days straight"
     },
     {
+      id: "calorie_crusher",
+      title: "Calorie Crusher",
+      icon: "💪",
+      description: "Burn 500 calories in a day"
+    },
+    {
       id: "marathon_runner",
       title: "Marathon Runner",
       icon: "🏃",
-      description: "Reach 10,000 steps in a day"
+      description: "Complete any challenge"
     },
     {
       id: "early_bird",
@@ -57,12 +63,6 @@ const Achievements = () => {
       title: "Night Owl",
       icon: "🌙",
       description: "Log activity after 10 PM"
-    },
-    {
-      id: "calorie_crusher",
-      title: "Calorie Crusher",
-      icon: "💪",
-      description: "Burn 500 calories in a day"
     }
   ];
 
@@ -71,8 +71,11 @@ const Achievements = () => {
     return user?.badges?.includes(badgeId) || false;
   };
 
-  return (
-    <div className="bg-[#0b0b12] border border-white/10 rounded-2xl p-6">
+
+return (
+  <div className="bg-[#0b0b12] border border-white/10 rounded-2xl p-6">
+
+
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold">Achievements</h3>
         <span className="text-xs text-gray-400">
@@ -80,7 +83,7 @@ const Achievements = () => {
         </span>
       </div>
       
-      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
+      <div className="grid grid-cols-4 gap-4 sm:grid-cols-6 md:grid-cols-8">
         {ALL_BADGES.map((badge) => {
           const earned = hasBadge(badge.id);
           return (
@@ -104,7 +107,7 @@ const Achievements = () => {
                 </div>
                 {!earned && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-5 h-5 bg-black/50 rounded-full flex items-center justify-center">
+                    <div className="flex items-center justify-center w-5 h-5 rounded-full bg-black/50">
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-2.5 h-2.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                       </svg>
@@ -112,21 +115,21 @@ const Achievements = () => {
                   </div>
                 )}
               </div>
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black/80 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+              <div className="absolute z-10 px-2 py-1 mb-2 text-xs text-white transition-opacity transform -translate-x-1/2 rounded opacity-0 bottom-full left-1/2 bg-black/80 group-hover:opacity-100 whitespace-nowrap">
                 <div className="font-medium">{badge.title}</div>
                 {!earned && (
-                  <div className="text-gray-300 text-xs">How to unlock: {badge.description}</div>
+                  <div className="text-xs text-gray-300">How to unlock: {badge.description}</div>
                 )}
               </div>
-              <div className="mt-2 text-xs text-center text-gray-400 truncate w-full">
+              <div className="w-full mt-2 text-xs text-center text-gray-400 truncate">
                 {badge.title}
               </div>
             </div>
           );
         })}
       </div>
-    </div>
-  );
+        </div>
+);
 };
 
 const Dashboard = () => {
@@ -190,8 +193,16 @@ useEffect(() => {
 
   if (!user) return null;
 
-  return (
-    <div className="min-h-screen px-6 py-6 space-y-10 text-white bg-black">
+
+   return (
+  <div className="dashboard-root">
+    {/* STATIC BACKGROUND */}
+    <div className="dashboard-bg"></div>
+    <div className="dashboard-overlay"></div>
+
+    {/* SCROLLABLE CONTENT */}
+    <div className="min-h-screen px-6 py-6 space-y-10 text-white dashboard-content">
+
       {/* HEADER */}
       <DashboardHeader
         message={message}
@@ -208,8 +219,10 @@ useEffect(() => {
 
       {/* WEEKLY PROGRESS (still static for now — will fix next) */}
       <WeeklyProgressChart data={weeklyData} />
-    </div>
-  );
+      </div>
+  </div>
+);
+
 };
 
 export default Dashboard;

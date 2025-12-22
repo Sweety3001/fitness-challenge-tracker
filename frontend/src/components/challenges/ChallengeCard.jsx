@@ -1,9 +1,21 @@
 import { useNavigate } from "react-router-dom";
 
-const ChallengeCard = ({
+// const ChallengeCard = ({
+//   title,
+//   type,
+//   progress,
+//   ucId,
+//   onRemove,
+//   onLog,
+//   todayValue,
+//   target,
+//   unit,
+// }) => {
+  const ChallengeCard = ({
   title,
   type,
   progress,
+  completedToday,
   ucId,
   onRemove,
   onLog,
@@ -11,9 +23,12 @@ const ChallengeCard = ({
   target,
   unit,
 }) => {
+
   const navigate = useNavigate();
 
-  const isCompleted = progress >= 100;
+  // const isCompleted = progress >= 100;
+  const isCompleted = completedToday===true;
+  const canLog = type === "steps" || !isCompleted; // New boolean for logging logic
   const isActiveSteps = type === "steps" && !isCompleted;
 
   return (
@@ -59,9 +74,9 @@ const ChallengeCard = ({
 
       {/* Progress */}
       <div className="mb-4">
-        <div className="flex justify-between text-sm text-gray-400 mb-2">
+        <div className="flex justify-between mb-2 text-sm text-gray-400">
           <span>Progress</span>
-          <span>{progress}%</span>
+          <span>{Number(progress) || 0}%</span>
         </div>
 
         <div className="h-2.5 rounded-full bg-white/10 overflow-hidden">
@@ -71,7 +86,8 @@ const ChallengeCard = ({
                 ? "bg-green-500"
                 : "bg-gradient-to-r from-violet-500 to-purple-600"
             }`}
-            style={{ width: `${Math.min(progress, 100)}%` }}
+            style={{ width: `${Number(progress) > 0 ? Math.min(progress, 100) : 0}%` }}
+
           />
         </div>
 
@@ -88,10 +104,10 @@ const ChallengeCard = ({
       </div>
 
       {/* Actions */}
-      <div className="flex justify-between items-center pt-3 border-t border-white/10">
+      <div className="flex items-center justify-between pt-3 border-t border-white/10">
         <button
           onClick={() => navigate(`/challenge/${ucId}`)}
-          className="text-sm text-violet-400 hover:text-violet-300 font-medium flex items-center"
+          className="flex items-center text-sm font-medium text-violet-400 hover:text-violet-300"
         >
           View Details
           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -100,7 +116,7 @@ const ChallengeCard = ({
         </button>
 
         <div className="flex gap-2">
-          {!isCompleted && onLog && (
+          {canLog && onLog && (
             <button
               onClick={() => onLog(type)}
               className="px-3 py-1.5 text-xs rounded-lg bg-violet-600 hover:bg-violet-700 transition-all duration-200 font-medium flex items-center"

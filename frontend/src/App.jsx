@@ -13,15 +13,19 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";
 import OAuthSuccess from "./pages/OAuthSuccess";
 import HomeRedirect from "./routes/HomeRedirect";
-
+import EditProfile from "./pages/EditProfile";
 import AddChallenge from "./pages/AddChallenge";
 import ChallengeDetails from "./pages/ChallengeDetails";
+
+// Import ToastContainer and CSS for toast notifications
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function AnimatedRoutes() {
   const location = useLocation();
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black">
+    <div className="relative min-h-screen overflow-hidden">
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
 
@@ -97,9 +101,18 @@ function AnimatedRoutes() {
   }
 />
 <Route path="/challenges" element={<AddChallenge />} />
-
+ <Route
+  path="/profile"
+  element={
+    <ProtectedRoute>
+      <EditProfile />
+    </ProtectedRoute>
+  }
+/>
 
         </Routes>
+       
+
       </AnimatePresence>
     </div>
   );
@@ -109,6 +122,8 @@ function App() {
   return (
     <Router>
       <AnimatedRoutes />
+      {/* ToastContainer with default configuration */}
+      <ToastContainer />
     </Router>
   );
 }

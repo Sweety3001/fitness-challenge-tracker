@@ -27,7 +27,7 @@ exports.joinChallenges = async (req, res) => {
       .map((id) => ({
         user: userId,
         challenge: id,
-        progress: 0,
+        // progress: 0,
         isPinned: false,
         active: true,
         startDate: new Date(),
@@ -51,24 +51,167 @@ exports.joinChallenges = async (req, res) => {
 /**
  * ✅ GET USER CHALLENGES
  */
+// exports.getMyChallenges = async (req, res) => {
+//   try {
+//     const challenges = await UserChallenge.find({
+//       user: req.user._id,
+//     }).populate("challenge");
+
+//     // 🔥 FILTER OUT BROKEN REFERENCES
+//     const validChallenges = challenges.filter(
+//       (uc) => uc.challenge !== null
+//     );
+
+//     res.json(validChallenges);
+//   } catch (err) {
+//     console.error("GET MY CHALLENGES ERROR:", err);
+//     res.status(500).json({ message: "Failed to fetch challenges" });
+//   }
+// };
+
+const ActivityLog = require("../models/ActivityLog.js");
+
+// const getToday = () => new Date().toISOString().split("T")[0];
+
+// /**
+//  * ✅ DASHBOARD CHALLENGES (DAILY RESET LOGIC)
+//  */
+// exports.getMyChallenges = async (req, res) => {
+//   try {
+//     const today = getToday();
+
+//     const userChallenges = await UserChallenge.find({
+//       user: req.user._id,
+//       active: true,
+//     }).populate("challenge");
+
+//     const dashboardChallenges = [];
+
+//     for (const uc of userChallenges) {
+//       if (!uc.challenge) continue;
+
+//       let todayValue = 0;
+
+//       if (uc.challenge.type === "steps") {
+//         const daily = await DailyActivity.findOne({
+//           user: req.user._id,
+//           date: today,
+//         });
+//         todayValue = daily?.steps || 0;
+
+//       } else if (uc.challenge.type === "calories") {
+//         const daily = await DailyActivity.findOne({
+//           user: req.user._id,
+//           date: today,
+//         });
+//         todayValue = daily?.calories || 0;
+
+//       } else {
+//         const logsToday = await ActivityLog.find({
+//           user: req.user._id,
+//           challenge: uc.challenge._id,
+//           date: today,
+//         });
+
+//         todayValue = logsToday.reduce((sum, log) => sum + log.value, 0);
+//       }
+
+//       const goal = Math.max(uc.challenge.defaultGoal || 1, 1);
+
+//       dashboardChallenges.push({
+//         _id: uc._id,
+//         challenge: uc.challenge,
+//         todayValue,
+//         progress: Math.min(
+//           Math.round((todayValue / goal) * 100),
+//           100
+//         ),
+//         completedToday: todayValue >= goal,
+//         isPinned: uc.isPinned,
+//       });
+//     }
+
+//     res.json(dashboardChallenges);
+//   } catch (err) {
+//     console.error("GET MY CHALLENGES ERROR:", err);
+//     res.status(500).json({ message: "Failed to fetch challenges" });
+//   }
+// };
+
+
+
 exports.getMyChallenges = async (req, res) => {
   try {
-    const challenges = await UserChallenge.find({
+    const startOfToday = new Date();
+startOfToday.setHours(0, 0, 0, 0);
+
+const endOfToday = new Date();
+endOfToday.setHours(23, 59, 59, 999);
+
+    const userChallenges = await UserChallenge.find({
       user: req.user._id,
+      active: true,
     }).populate("challenge");
 
-    // 🔥 FILTER OUT BROKEN REFERENCES
-    const validChallenges = challenges.filter(
-      (uc) => uc.challenge !== null
-    );
+    const dashboardChallenges = [];
 
-    res.json(validChallenges);
+    for (const uc of userChallenges) {
+      if (!uc.challenge) continue;
+
+      // 🔥 FETCH ONLY TODAY'S LOGS
+      const logsToday = await ActivityLog.find({
+        user: req.user._id,
+        challenge: uc.challenge._id,
+        date: {
+  $gte: startOfToday,
+  $lte: endOfToday
+},
+
+
+
+      });
+await ActivityLog.deleteMany({
+  user: req.user._id,
+  challenge: challengeId
+});
+
+      const todayValue = logsToday.reduce(
+        (sum, log) => sum + log.value,
+        0
+      );
+
+      const progress = Math.min(
+        Math.round(
+          (todayValue / uc.challenge.defaultGoal) * 100
+        ),
+        100
+      );
+      const completedToday = todayValue >= uc.challenge.defaultGoal;
+      console.log("DASHBOARD DEBUG", {
+  challenge: uc.challenge.title,
+  today,
+  todayValue,
+  progress,
+  completedToday
+});
+
+      dashboardChallenges.push({
+        _id: uc._id,
+        challenge: uc.challenge,
+        todayValue,
+        progress,                 // ✅ DAILY ONLY
+        completedToday: todayValue >= uc.challenge.defaultGoal,
+        isPinned: uc.isPinned,
+      });
+    }
+
+    res.json(dashboardChallenges);
   } catch (err) {
     console.error("GET MY CHALLENGES ERROR:", err);
     res.status(500).json({ message: "Failed to fetch challenges" });
   }
+  
 };
-
 
 /**
  * ✅ PIN / UNPIN CHALLENGE

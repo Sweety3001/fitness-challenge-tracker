@@ -22,11 +22,17 @@ level: {
   type: Number,
   default: 1,
 },
-badges: [
-  {
-    type: String,
-  },
-],
+badges: {
+  type: [String],
+  default: []
+},
+streak: {
+  type: Number,
+  default: 0,
+},
+lastActiveDate:{
+  type: Date,
+},
 
 }, { timestamps: true });
 

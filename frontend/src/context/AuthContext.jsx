@@ -24,6 +24,32 @@ export const AuthProvider = ({ children }) => {
     await fetchUser();
   };
 
+  // Enhanced logActivity that updates user badges
+  const logActivity = async (data) => {
+    const response = await api.logActivity(data);
+    // Update user badges with permanent badges from response
+    if (response.permanentBadges && user) {
+      setUser({
+        ...user,
+        badges: response.permanentBadges
+      });
+    }
+    return response;
+  };
+
+  // Enhanced logSteps that updates user badges
+  const logSteps = async (data) => {
+    const response = await api.logSteps(data);
+    // Update user badges with permanent badges from response
+    if (response.permanentBadges && user) {
+      setUser({
+        ...user,
+        badges: response.permanentBadges
+      });
+    }
+    return response;
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
@@ -57,6 +83,8 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         refreshUser,
+        logActivity,  // Expose enhanced logActivity
+        logSteps,     // Expose enhanced logSteps
         isProfileComplete,
       }}
     >

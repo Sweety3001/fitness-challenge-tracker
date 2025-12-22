@@ -13,7 +13,6 @@ const TodayStats = ({ stats, loading }) => {
 
   const {
     steps = 0,
-    activeMinutes = 0,
     calories = 0,
   } = stats;
 
@@ -28,7 +27,7 @@ const TodayStats = ({ stats, loading }) => {
       </div>
 
       {/* Main stats */}
-      <div className="grid grid-cols-3 gap-4 text-center">
+      <div className="grid grid-cols-2 gap-4 text-center">
         <div>
           <p className="text-2xl font-bold text-white">
             {steps.toLocaleString()}
@@ -38,28 +37,21 @@ const TodayStats = ({ stats, loading }) => {
 
         <div>
           <p className="text-2xl font-bold text-white">
-            {activeMinutes}
-          </p>
-          <p className="text-xs text-gray-400">Active min</p>
-        </div>
-
-        <div>
-          <p className="text-2xl font-bold text-white">
-            {calories}
+            {calories.toLocaleString()}
           </p>
           <p className="text-xs text-gray-400">kcal</p>
         </div>
       </div>
 
       {/* Divider */}
-      <div className="h-px my-4 bg-white/10" />
+      {/* <div className="h-px my-4 bg-white/10" /> */}
 
       {/* Footer action */}
-      <div className="text-right">
+      {/* <div className="text-right">
         <button className="text-sm text-violet-400 hover:underline">
           View details →
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };
