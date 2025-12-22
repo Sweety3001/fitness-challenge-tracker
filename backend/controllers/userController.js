@@ -47,18 +47,18 @@ export const getProfile = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const { name, age, gender, fitnessLevel } = req.body;
+    const { name, age, gender, fitnessLevel, avatar } = req.body;
 
     if (name !== undefined) user.name = name;
     if (age !== undefined) user.age = age;
     if (gender !== undefined) user.gender = gender;
     if (fitnessLevel !== undefined) user.fitnessLevel = fitnessLevel;
-
+    if(avatar !== undefined) user.avatar = avatar;
     await user.save();
 
     res.json({
@@ -69,6 +69,7 @@ export const updateProfile = async (req, res) => {
         age: user.age,
         gender: user.gender,
         fitnessLevel: user.fitnessLevel,
+        avatar: user.avatar,
         xp: user.xp,
         level: user.level,
         badges: user.badges,

@@ -274,16 +274,41 @@ router.get("/challenge/:userChallengeId", protect, async (req, res) => {
       });
     }
 
-    res.json({
-      challenge: {
-        title: uc.challenge.title,
-        unit: uc.challenge.unit,
-        goal: uc.challenge.defaultGoal,
-      },
-      progress: uc.progress,
-      logs,
-      graph,
-    });
+    // res.json({
+    //   challenge: {
+    //     title: uc.challenge.title,
+    //     unit: uc.challenge.unit,
+    //     goal: uc.challenge.defaultGoal,
+    //   },
+    //   progress: uc.progress,
+    //   logs,
+    //   graph,
+    // });
+    const today = new Date().toISOString().split("T")[0];
+
+const todayLogs = logs.filter(l => l.date === today);
+const todayTotal = todayLogs.reduce((s, l) => s + l.value, 0);
+
+const progress =
+  uc.challenge.defaultGoal > 0
+    ? Math.min(
+        Math.round((todayTotal / uc.challenge.defaultGoal) * 100),
+        100
+      )
+    : 0;
+
+res.json({
+  challenge: {
+    title: uc.challenge.title,
+    unit: uc.challenge.unit,
+    goal: uc.challenge.defaultGoal,
+  },
+  progress,
+  todayValue: todayTotal,
+  logs,     // ✅ full history
+  graph,
+});
+
   } catch (err) {
     console.error("CHALLENGE DETAILS ERROR:", err);
     res.status(500).json({ message: "Failed to fetch challenge details" });

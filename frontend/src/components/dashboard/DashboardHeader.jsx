@@ -169,14 +169,24 @@ const DashboardHeader = ({ message, streak }) => {
 
           {/* AVATAR WITH POPOVER */}
           <div className="relative">
-            <div
+            {/* <div
               onClick={() => setOpenProfile(!openProfile)}
               className="relative flex items-center justify-center w-12 h-12 transition border rounded-full cursor-pointer bg-white/10 border-white/20 hover:border-white/40"
             >
               <span className="text-sm font-semibold">
                 {user?.name?.[0] || "U"}
               </span>
-            </div>
+            </div> */}
+            <div
+  onClick={() => setOpenProfile(!openProfile)}
+  className="relative w-12 h-12 cursor-pointer"
+>
+  <img
+    src={user?.avatar || "/avatars/default.png"}
+    alt="avatar"
+    className="object-cover w-12 h-12 transition border rounded-full border-violet-500 hover:scale-105"
+  />
+</div>
 
             {/* POPOVER */}
             {openProfile && (
@@ -187,9 +197,15 @@ const DashboardHeader = ({ message, streak }) => {
                 {/* USER INFO */}
                 <div className="p-4 border-b border-white/10">
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center text-base font-bold rounded-full w-10 h-10 bg-violet-600">
+                    {/* <div className="flex items-center justify-center w-10 h-10 text-base font-bold rounded-full bg-violet-600">
                       {user?.name?.[0] || "U"}
-                    </div>
+                    </div> */}
+                    <img
+  src={user?.avatar || "/avatars/default.png"}
+  alt="avatar"
+  className="object-cover w-10 h-10 border rounded-full border-violet-500"
+/>
+
                     <div>
                       <p className="font-semibold text-white">{user?.name}</p>
                       <p className="text-xs text-gray-400 truncate max-w-[160px]">
@@ -219,7 +235,7 @@ const DashboardHeader = ({ message, streak }) => {
 
                 {/* BADGES SECTION */}
                 <div className="p-4">
-                  <h3 className="text-sm font-semibold text-white mb-3">Achievements</h3>
+                  <h3 className="mb-3 text-sm font-semibold text-white">Achievements</h3>
                   {earnedBadges.length > 0 ? (
                     <div className="grid grid-cols-4 gap-3">
                       {earnedBadges.map((badge) => (
@@ -228,32 +244,29 @@ const DashboardHeader = ({ message, streak }) => {
                           className="relative group"
                         >
                           <div className="flex flex-col items-center justify-center">
-                            <div className="
-                              flex items-center justify-center w-12 h-12 rounded-full
-                              bg-violet-600/20 text-violet-400 glow
-                            ">
+                            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-violet-600/20 text-violet-400 glow">
                               <span className="text-lg">{badge.icon}</span>
                             </div>
                           </div>
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black/80 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                          <div className="absolute z-10 px-2 py-1 mb-2 text-xs text-white transition-opacity transform -translate-x-1/2 rounded opacity-0 bottom-full left-1/2 bg-black/80 group-hover:opacity-100 whitespace-nowrap">
                             <div className="font-medium">{badge.title}</div>
                           </div>
-                          <div className="mt-1 text-xs text-center text-gray-400 truncate w-full">
+                          <div className="w-full mt-1 text-xs text-center text-gray-400 truncate">
                             {badge.title}
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-4">
-                      <p className="text-gray-400 text-sm">No achievements yet</p>
+                    <div className="py-4 text-center">
+                      <p className="text-sm text-gray-400">No achievements yet</p>
                     </div>
                   )}
                   
                   {/* VIEW ALL ACHIEVEMENTS BUTTON */}
-                  <div className="mt-4 pt-3 border-t border-white/10">
+                  <div className="pt-3 mt-4 border-t border-white/10">
                     <button 
-                      className="w-full text-xs text-violet-400 hover:text-violet-300 text-center"
+                      className="w-full text-xs text-center text-violet-400 hover:text-violet-300"
                       onClick={() => {
                         // Future implementation for viewing all achievements
                         console.log("View all achievements clicked");

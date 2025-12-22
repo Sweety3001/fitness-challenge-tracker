@@ -4,7 +4,7 @@ const router = express.Router();
 import { protect } from "../middleware/authMiddleware.js";
 import UserChallenge from "../models/UserChallenge.js";
 import Challenge from "../models/Challenge.js";
-
+import ActivityLog from "../models/ActivityLog.js";
 /**
  * GET all available challenges (Add Challenge page)
  */
@@ -40,7 +40,7 @@ router.post("/join", protect, async (req, res) => {
       .map((id) => ({
         user: req.user._id,
         challenge: id,
-        progress: 0,
+        // progress: 0,
         isPinned: false,
         startDate: new Date(),
       }));
@@ -62,12 +62,46 @@ router.post("/join", protect, async (req, res) => {
  * GET user's challenges (Dashboard)
  */
 router.get("/my", protect, async (req, res) => {
-  const challenges = await UserChallenge.find({
+  const today = new Date().toISOString().split("T")[0];
+
+  const userChallenges = await UserChallenge.find({
     user: req.user._id,
   }).populate("challenge");
 
-  res.json(challenges);
+  const result = [];
+
+  for (const uc of userChallenges) {
+    if (!uc.challenge) continue;
+
+    // ✅ ONLY TODAY LOGS
+    const logs = await ActivityLog.find({
+      user: req.user._id,
+      challenge: uc.challenge._id,
+      date: today,
+    });
+
+    const todayTotal = logs.reduce((sum, l) => sum + l.value, 0);
+
+    const target = uc.challenge.defaultGoal || 0;
+    const progress =
+      target > 0
+        ? Math.min(Math.round((todayTotal / target) * 100), 100)
+        : 0;
+
+    result.push({
+      _id: uc._id,
+      challenge: uc.challenge,
+      startDate: uc.startDate,
+      isPinned: uc.isPinned,
+      active: uc.active,
+      progress,        // ✅ computed
+      todayValue: todayTotal,
+    });
+  }
+
+  res.json(result);
 });
+
 
 /**
  * REMOVE a challenge

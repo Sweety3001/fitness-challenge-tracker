@@ -10,7 +10,12 @@ export const AuthProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
       const res = await api.getProfile();
-      setUser(res);
+      // setUser(res);
+      setUser({
+  ...res,
+  avatar: res.avatar || "/avatars/default.png",
+});
+
     } catch (err) {
       setUser(null);
       localStorage.removeItem("accessToken");

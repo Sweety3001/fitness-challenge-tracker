@@ -33,6 +33,10 @@ streak: {
 lastActiveDate:{
   type: Date,
 },
+  avatar: {
+    type: String,
+    default:"/avatars/default.png"
+  },
 
 }, { timestamps: true });
 

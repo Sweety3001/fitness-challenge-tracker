@@ -13,17 +13,12 @@ const getToday = () => new Date().toISOString().split("T")[0];
 const evaluateAchievements = async (userId) => {
   const user = await User.findById(userId);
   const today = getToday();
-const getToday = () => new Date().toISOString().split("T")[0];
 
-  // const activityLogs = await ActivityLog.find({
-  //   user: userId,
-  //   date: today,
-  // });
-  const logs = await ActivityLog.find({
-  user: userId,
-  challenge: challengeId,
-  date: today
-});
+  // ✅ get ALL today logs (no challenge filter)
+  const activityLogs = await ActivityLog.find({
+    user: userId,
+    date: today,
+  });
 
   let totalSteps = 0;
   let totalCalories = 0;
@@ -50,13 +45,10 @@ const getToday = () => new Date().toISOString().split("T")[0];
   const dailyUnlocked = [];
 
   for (const badge of BADGES) {
-    let unlock = false;
-
     switch (badge.key) {
       case "first_challenge": {
         const hasAnyActivity = await ActivityLog.exists({ user: userId });
-        unlock = !!hasAnyActivity && !(user.badges || []).includes(badge.key);
-        if (unlock) {
+        if (hasAnyActivity && !user.badges.includes(badge.key)) {
           permanentUnlocked.push(badge.key);
         }
         break;
@@ -71,70 +63,28 @@ const getToday = () => new Date().toISOString().split("T")[0];
         break;
 
       case "streak_7":
-        if (user.streak >= 7 && !(user.badges || []).includes(badge.key)) {
+        if (user.streak >= 7 && !user.badges.includes(badge.key)) {
           permanentUnlocked.push(badge.key);
         }
         break;
 
       case "streak_30":
-        if (user.streak >= 30 && !(user.badges || []).includes(badge.key)) {
+        if (user.streak >= 30 && !user.badges.includes(badge.key)) {
           permanentUnlocked.push(badge.key);
         }
         break;
-
-      // case "marathon_runner": {
-      //   const completed = await UserChallenge.exists({
-      //     user: userId,
-      //     completed: true,
-      //   });
-      //   if (completed && !(user.badges || []).includes(badge.key)) {
-      //     permanentUnlocked.push(badge.key);
-      //   }
-      //   break;
-      // }
-      case "marathon_runner": {
-  const completedOnce = await ActivityLog.exists({
-    user: userId,
-  });
-  if (completedOnce && !(user.badges || []).includes(badge.key)) {
-    permanentUnlocked.push(badge.key);
-  }
-  break;
-}
-
-
-      case "early_bird": {
-        const early = activityLogs.some(
-          (l) => new Date(l.createdAt).getHours() < 8
-        );
-        if (early) dailyUnlocked.push(badge.key);
-        break;
-      }
-
-      case "night_owl": {
-        const night = activityLogs.some(
-          (l) => new Date(l.createdAt).getHours() >= 22
-        );
-        if (night) dailyUnlocked.push(badge.key);
-        break;
-      }
     }
   }
 
-  // Save ONLY permanent badges to user
   if (permanentUnlocked.length > 0) {
     user.badges.push(...permanentUnlocked);
     user.badges = [...new Set(user.badges)];
     await user.save();
   }
 
-  // DO NOT save daily badges to database - they are computed only
-
-  return {
-    permanentUnlocked,
-    dailyUnlocked,
-  };
+  return { permanentUnlocked, dailyUnlocked };
 };
+
 
 
 /* ======================================================
