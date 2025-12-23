@@ -2,6 +2,12 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { api } from "../api/api";
 
 const AuthContext = createContext(null);
+const msUntilNextMidnight = () => {
+  const now = new Date();
+  const midnight = new Date();
+  midnight.setHours(24, 0, 0, 0);
+  return midnight - now;
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -119,6 +125,34 @@ useEffect(() => {
   loadDailyBadges();
 }, []);
 
+
+useEffect(() => {
+  let timeoutId;
+
+  const scheduleMidnightRefresh = () => {
+    const ms = msUntilNextMidnight();
+
+    timeoutId = setTimeout(async () => {
+      try {
+        // Re-fetch today's achievements (new day now)
+        const res = await api.getTodayAchievements();
+        setDailyBadges(res.dailyUnlocked || []);
+      } catch (err) {
+        console.error("Failed to refresh daily badges at midnight", err);
+      }
+
+      // Schedule again for next midnight
+      scheduleMidnightRefresh();
+    }, ms);
+  };
+
+  scheduleMidnightRefresh();
+
+  return () => {
+    if (timeoutId) clearTimeout(timeoutId);
+  };
+}, []);
+
   // const login = async (token) => {
   //   localStorage.setItem("accessToken", token);
   //   setLoading(true);
@@ -139,6 +173,7 @@ const login = async (token) => {
   localStorage.removeItem("accessToken");
   sessionStorage.removeItem("accessToken");
   setUser(null);
+  setDailyBadges([]);
   setLoading(false);
   window.location.href = "/";
 };
