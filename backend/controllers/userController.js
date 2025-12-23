@@ -45,6 +45,41 @@ export const getProfile = async (req, res) => {
 
 // import User from "../models/User.js";
 
+// export const updateProfile = async (req, res) => {
+//   try {
+//     const user = await User.findById(req.user.id);
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     const { name, age, gender, fitnessLevel, avatar } = req.body;
+
+//     if (name !== undefined) user.name = name;
+//     if (age !== undefined) user.age = age;
+//     if (gender !== undefined) user.gender = gender;
+//     if (fitnessLevel !== undefined) user.fitnessLevel = fitnessLevel;
+//     if(avatar !== undefined) user.avatar = avatar;
+//     await user.save();
+
+//     res.json({
+//       success: true,
+//       user: {
+//         name: user.name,
+//         email: user.email,
+//         age: user.age,
+//         gender: user.gender,
+//         fitnessLevel: user.fitnessLevel,
+//         avatar: user.avatar,
+//         xp: user.xp,
+//         level: user.level,
+//         badges: user.badges,
+//       },
+//     });
+//   } catch (err) {
+//     console.error("UPDATE PROFILE ERROR:", err);
+//     res.status(500).json({ message: "Failed to update profile" });
+//   }
+// };
 export const updateProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -52,13 +87,26 @@ export const updateProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const { name, age, gender, fitnessLevel, avatar } = req.body;
+    const {
+      name,
+      age,
+      gender,
+      fitnessLevel,
+      avatar,
+      profileCompleted, // 🔥 ADD THIS
+    } = req.body;
 
     if (name !== undefined) user.name = name;
     if (age !== undefined) user.age = age;
     if (gender !== undefined) user.gender = gender;
     if (fitnessLevel !== undefined) user.fitnessLevel = fitnessLevel;
-    if(avatar !== undefined) user.avatar = avatar;
+    if (avatar !== undefined) user.avatar = avatar;
+
+    // 🔥 THIS IS THE MOST IMPORTANT LINE
+    if (profileCompleted === true) {
+      user.profileCompleted = true;
+    }
+
     await user.save();
 
     res.json({
@@ -70,6 +118,7 @@ export const updateProfile = async (req, res) => {
         gender: user.gender,
         fitnessLevel: user.fitnessLevel,
         avatar: user.avatar,
+        profileCompleted: user.profileCompleted, // 🔥 RETURN IT
         xp: user.xp,
         level: user.level,
         badges: user.badges,

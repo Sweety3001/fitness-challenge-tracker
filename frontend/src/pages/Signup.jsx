@@ -18,9 +18,18 @@ const Signup = () => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
     setError("");
   };
+//   if (!form.fullName || !form.email || !form.password) {
+//   setError("All fields are required");
+//   setLoading(false);
+//   return;
+// }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.fullName || !form.email || !form.password) {
+    setError("All fields are required");
+    return;
+  }
     setLoading(true);
     
     try {
@@ -34,6 +43,7 @@ const Signup = () => {
       const res = await api.signup(signupData);
       if (res?.accessToken) {
         // Log the user in automatically after signup
+        localStorage.setItem("accessToken", res.accessToken);
         login(res.accessToken);
         // Check if profile is completed, if not redirect to profile setup
         if (!res.user.profileCompleted) {
@@ -64,6 +74,7 @@ const Signup = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           name="fullName"
+          value={form.fullName}
           placeholder="Full name"
           onChange={handleChange}
           className="w-full px-4 py-2.5 rounded-lg bg-[#151522] text-white border border-gray-700 focus:ring-2 focus:ring-violet-500 outline-none"
@@ -72,6 +83,7 @@ const Signup = () => {
         <input
           name="email"
           type="email"
+          value={form.email}
           placeholder="Email"
           onChange={handleChange}
           className="w-full px-4 py-2.5 rounded-lg bg-[#151522] text-white border border-gray-700 focus:ring-2 focus:ring-violet-500 outline-none"
@@ -87,6 +99,7 @@ const Signup = () => {
      <div className="relative">
   <input
     name="password"
+    value={form.password}
     type={showPassword ? "text" : "password"}
     placeholder="Password"
     onChange={handleChange}

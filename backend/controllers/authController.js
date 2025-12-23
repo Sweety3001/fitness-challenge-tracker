@@ -11,7 +11,11 @@ const hashToken = (token) =>
 const signup = async (req, res) => {
   try {
     const { email, password, name } = req.body;
-
+    if (!email || !password || !name) {
+      return res.status(400).json({
+        message: "Name, email and password are required",
+      });
+    }
     const exists = await User.findOne({ email });
     if (exists) {
       return res.status(400).json({ message: "Email already exists" });
@@ -69,6 +73,11 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    if (!email || !password) {
+  return res.status(400).json({
+    message: "Email and password are required",
+  });
+}
 
     const user = await User.findOne({ email });
     if (!user) {

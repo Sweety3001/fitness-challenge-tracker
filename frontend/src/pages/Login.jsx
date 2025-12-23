@@ -20,46 +20,76 @@ const [rememberMe, setRememberMe] = useState(false);
     setError("");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const res = await api.login(form);
-    setLoading(false);
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     setLoading(true);
+//     const res = await api.login(form);
+//     setLoading(false);
 
-    // if (res?.accessToken) {
-    //   login(res.accessToken);
-    //   navigate("/dashboard");
+//     // if (res?.accessToken) {
+//     //   login(res.accessToken);
+//     //   navigate("/dashboard");
 
-    // } else {
-    //   setError(res?.message || "Login failed");
-    // }
-//     if (res?.accessToken) {
+//     // } else {
+//     //   setError(res?.message || "Login failed");
+//     // }
+// //     if (res?.accessToken) {
+// //   if (rememberMe) {
+// //     localStorage.setItem("rememberedEmail", form.email);
+// //     localStorage.setItem("accessToken", res.accessToken);
+// //   } else {
+// //     localStorage.removeItem("rememberedEmail");
+// //     sessionStorage.setItem("accessToken", res.accessToken);
+// //   }
+
+// //   login(res.accessToken);
+// //   navigate("/dashboard");
+// // }
+// if (res?.accessToken) {
+//   localStorage.setItem("accessToken", res.accessToken);
 //   if (rememberMe) {
+//     // localStorage.setItem("accessToken", res.accessToken);
 //     localStorage.setItem("rememberedEmail", form.email);
-//     localStorage.setItem("accessToken", res.accessToken);
 //   } else {
+//     // sessionStorage.setItem("accessToken", res.accessToken);
 //     localStorage.removeItem("rememberedEmail");
-//     sessionStorage.setItem("accessToken", res.accessToken);
 //   }
 
 //   login(res.accessToken);
 //   navigate("/dashboard");
 // }
-if (res?.accessToken) {
-  if (rememberMe) {
-    localStorage.setItem("accessToken", res.accessToken);
-    localStorage.setItem("rememberedEmail", form.email);
-  } else {
-    sessionStorage.setItem("accessToken", res.accessToken);
-    localStorage.removeItem("rememberedEmail");
+
+//   };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!form.email || !form.password) {
+    setError("Email and password are required");
+    return;
   }
 
-  login(res.accessToken);
-  navigate("/dashboard");
-}
+  try {
+    setLoading(true);
+    const res = await api.login(form);
 
-  };
-  useEffect(() => {
+    localStorage.setItem("accessToken", res.accessToken);
+
+    if (rememberMe) {
+      localStorage.setItem("rememberedEmail", form.email);
+    } else {
+      localStorage.removeItem("rememberedEmail");
+    }
+
+    login(res.accessToken);
+    navigate("/dashboard");
+  } catch (err) {
+    setError(err.message || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
   const savedEmail = localStorage.getItem("rememberedEmail");
   if (savedEmail) {
     setForm(prev => ({ ...prev, email: savedEmail }));

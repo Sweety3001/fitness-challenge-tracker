@@ -1,6 +1,8 @@
 import axios from "axios";
 
 const API_BASE_URL = "http://localhost:5000/api";
+const getToken = () =>
+  localStorage.getItem("accessToken");
 
 /* =======================
    AXIOS INSTANCE
@@ -12,20 +14,32 @@ const axiosInstance = axios.create({
   },
 });
 
+// axiosInstance.interceptors.request.use((config) => {
+//   const token = localStorage.getItem("accessToken");
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// });
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
+
 /* =======================
    FETCH HEADERS (legacy)
 ======================= */
+// const getHeaders = () => ({
+//   "Content-Type": "application/json",
+//   Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+// });
 const getHeaders = () => ({
   "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+  Authorization: `Bearer ${getToken()}`,
 });
 
 export const api = {

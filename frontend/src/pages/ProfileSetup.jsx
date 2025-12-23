@@ -28,16 +28,29 @@ const ProfileSetup = () => {
 };
 
   // ✅ FINISH
-  const finishSetup = async () => {
-    try {
-      await api.updateProfile(profileData);
-      await refreshUser();
-    } catch (err) {
-      console.error("Profile update failed", err);
-    } finally {
-      navigate("/dashboard");
-    }
-  };
+  // const finishSetup = async () => {
+  //   try {
+  //     await api.updateProfile(profileData);
+  //     await refreshUser();
+  //   } catch (err) {
+  //     console.error("Profile update failed", err);
+  //   } finally {
+  //     navigate("/dashboard");
+  //   }
+  // };
+const finishSetup = async () => {
+  try {
+    await api.updateProfile({
+      ...profileData,
+      profileCompleted: true, // 🔥 THIS WAS MISSING
+    });
+
+    await refreshUser();
+    navigate("/dashboard");
+  } catch (err) {
+    console.error("Profile update failed", err);
+  }
+};
 
   return (
     <AnimatedPage>
