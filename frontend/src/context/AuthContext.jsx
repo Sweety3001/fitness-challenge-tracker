@@ -106,6 +106,18 @@ useEffect(() => {
     setLoading(false);
   }
 }, []);
+useEffect(() => {
+  const loadDailyBadges = async () => {
+    try {
+      const res = await api.getTodayAchievements();
+      setDailyBadges(res.dailyUnlocked || []);
+    } catch (err) {
+      console.error("Failed to load daily badges", err);
+    }
+  };
+
+  loadDailyBadges();
+}, []);
 
   // const login = async (token) => {
   //   localStorage.setItem("accessToken", token);

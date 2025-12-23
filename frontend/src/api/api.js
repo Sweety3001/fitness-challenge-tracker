@@ -156,6 +156,11 @@ export const api = {
   if (!res.ok) throw new Error("Failed to fetch today snapshot");
   return res.json();
 },
+getTodayAchievements: async () => {
+  const res = await axiosInstance.get("/activity/today-achievements");
+  return res.data;
+},
+
 
 
 getWeeklyActivity: async () => {

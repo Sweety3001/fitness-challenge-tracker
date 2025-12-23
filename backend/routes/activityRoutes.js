@@ -1,13 +1,12 @@
 import express from "express";
 const router = express.Router();
 import { protect } from "../middleware/authMiddleware.js";
-
 import ActivityLog from "../models/ActivityLog.js";
 import UserChallenge from "../models/UserChallenge.js";
 import User from "../models/User.js";
 import DailyActivity from "../models/DailyActivity.js";
 import Challenge from "../models/Challenge.js";
-import { logActivity, logSteps } from "../controllers/activityController.js";
+import { logActivity, logSteps, getTodayAchievements } from "../controllers/activityController.js";
 
 /**
  * ===============================
@@ -18,6 +17,7 @@ router.post("/log", protect, logActivity);       // non-steps
 router.post("/steps", protect, logSteps);        // steps-specific
 // routes/userRoutes.js
 // router.put("/profile", protect, updateProfile);
+router.get("/today-achievements", protect, getTodayAchievements);
 
 /**
  * ===============================

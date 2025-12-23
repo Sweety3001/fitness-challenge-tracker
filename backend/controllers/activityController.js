@@ -7,6 +7,14 @@ import User from "../models/User.js";
 
 const getToday = () => new Date().toISOString().split("T")[0];
 
+
+const getTodayAchievements = async (req, res) => {
+  const badges = await evaluateAchievements(req.user._id);
+  res.json({
+    dailyUnlocked: badges.dailyUnlocked
+  });
+};
+
 /* ======================================================
    ACHIEVEMENT EVALUATION (SINGLE SOURCE OF TRUTH)
 ====================================================== */
@@ -325,4 +333,4 @@ const logSteps = async (req, res) => {
   }
 };
 
-export { logActivity, logSteps };
+export { logActivity, logSteps, getTodayAchievements};
