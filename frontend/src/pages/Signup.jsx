@@ -4,6 +4,7 @@ import { api } from "../api/api";
 import AuthLayout from "../layouts/AuthLayout";
 import AnimatedPage from "../components/AnimatedPage";
 import { useAuth } from "../context/AuthContext";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Signup = () => {
   const { login } = useAuth();
@@ -11,6 +12,7 @@ const Signup = () => {
   const [form, setForm] = useState({ fullName: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -75,13 +77,35 @@ const Signup = () => {
           className="w-full px-4 py-2.5 rounded-lg bg-[#151522] text-white border border-gray-700 focus:ring-2 focus:ring-violet-500 outline-none"
         />
 
-        <input
+        {/* <input
           name="password"
           type="password"
           placeholder="Password"
           onChange={handleChange}
           className="w-full px-4 py-2.5 rounded-lg bg-[#151522] text-white border border-gray-700 focus:ring-2 focus:ring-violet-500 outline-none"
-        />
+        /> */}
+     <div className="relative">
+  <input
+    name="password"
+    type={showPassword ? "text" : "password"}
+    placeholder="Password"
+    onChange={handleChange}
+    className="w-full px-4 py-2.5 pr-12 rounded-lg bg-[#151522] text-white border border-gray-700 focus:ring-2 focus:ring-violet-500 outline-none"
+  />
+
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute text-gray-400 -translate-y-1/2 right-3 top-1/2 hover:text-white"
+  >
+    {showPassword ? (
+      <EyeSlashIcon className="w-5 h-5" />
+    ) : (
+      <EyeIcon className="w-5 h-5" />
+    )}
+  </button>
+</div>
+
 
         <button 
           type="submit"

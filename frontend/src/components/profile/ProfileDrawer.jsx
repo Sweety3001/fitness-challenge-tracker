@@ -2,7 +2,9 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const ProfileDrawer = ({ open, onClose }) => {
-  const { user, logout } = useAuth();
+  // const { user, logout } = useAuth();
+  const { user, dailyBadges, logout } = useAuth();
+
   const navigate = useNavigate();
 
   if (!open) return null;
@@ -47,7 +49,7 @@ const ProfileDrawer = ({ open, onClose }) => {
 
         {/* USER INFO */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="flex items-center justify-center text-base font-bold rounded-full w-12 h-12 bg-violet-600">
+          <div className="flex items-center justify-center w-12 h-12 text-base font-bold rounded-full bg-violet-600">
             {user?.name?.[0] || "U"}
           </div>
 
@@ -61,7 +63,7 @@ const ProfileDrawer = ({ open, onClose }) => {
 
         {/* LEVEL & XP */}
         <div className="mb-6">
-          <div className="flex items-center justify-between text-xs mb-2">
+          <div className="flex items-center justify-between mb-2 text-xs">
             <span className="text-gray-400">Level {currentLevel}</span>
             <span className="text-gray-400">{currentXP}/{nextLevelXP} XP</span>
           </div>
@@ -75,25 +77,42 @@ const ProfileDrawer = ({ open, onClose }) => {
 
         {/* BADGES */}
         <div className="mb-6">
-          <p className="text-xs text-gray-400 mb-2">Badges</p>
+          <p className="mb-2 text-xs text-gray-400">Badges</p>
           <div className="flex flex-wrap gap-2">
-            {user?.badges && user.badges.length > 0 ? (
+            {/* {user?.badges && user.badges.length > 0 ? (
               user.badges.map((badgeKey, i) => (
                 <div 
                   key={i}
                   className="relative group"
                 >
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-violet-600/20 text-violet-400 text-sm">
+                  <div className="flex items-center justify-center w-8 h-8 text-sm rounded-full bg-violet-600/20 text-violet-400">
                     🏅
                   </div>
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-black/80 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                  <div className="absolute z-10 px-2 py-1 mb-2 text-xs text-white transition-opacity transform -translate-x-1/2 rounded opacity-0 bottom-full left-1/2 bg-black/80 group-hover:opacity-100 whitespace-nowrap">
                     {badgeKey}
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-xs text-gray-500 italic">No badges yet</p>
-            )}
+              <p className="text-xs italic text-gray-500">No badges yet</p>
+            )} */}
+            {(user?.badges?.length > 0 || dailyBadges?.length > 0) ? (
+  [...new Set([...(user?.badges || []), ...(dailyBadges || [])])].map(
+    (badgeKey, i) => (
+      <div key={i} className="relative group">
+        <div className="flex items-center justify-center w-8 h-8 text-sm rounded-full bg-violet-600/20 text-violet-400">
+          🏅
+        </div>
+        <div className="absolute z-10 px-2 py-1 mb-2 text-xs text-white transition-opacity transform -translate-x-1/2 rounded opacity-0 bottom-full left-1/2 bg-black/80 group-hover:opacity-100 whitespace-nowrap">
+          {badgeKey}
+        </div>
+      </div>
+    )
+  )
+) : (
+  <p className="text-xs italic text-gray-500">No badges yet</p>
+)}
+
           </div>
         </div>
 

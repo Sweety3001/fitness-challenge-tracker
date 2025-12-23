@@ -12,7 +12,7 @@ import { getDailyMessage } from "../utils/getDailyMessage";
 
 // Achievements Component
 const Achievements = () => {
-  const { user } = useAuth();
+  const { user, dailyBadges } = useAuth();
 
   // All possible badges - using canonical badge keys
   const ALL_BADGES = [
@@ -67,9 +67,23 @@ const Achievements = () => {
   ];
 
   // Check if user has earned a specific badge
-  const hasBadge = (badgeId) => {
-    return user?.badges?.includes(badgeId) || false;
-  };
+  // const hasBadge = (badgeId) => {
+  //   return user?.badges?.includes(badgeId) || false;
+  // };
+  const DAILY_BADGES = [
+  "steps_10k_day",
+  "calorie_crusher",
+  "early_bird",
+  "night_owl"
+];
+
+const hasBadge = (badgeId) => {
+  if (DAILY_BADGES.includes(badgeId)) {
+    return dailyBadges?.includes(badgeId);
+  }
+  return user?.badges?.includes(badgeId);
+};
+
 
 
 return (
@@ -79,7 +93,10 @@ return (
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold">Achievements</h3>
         <span className="text-xs text-gray-400">
-          {user?.badges?.length || 0} / {ALL_BADGES.length} unlocked
+          {/* {user?.badges?.length || 0} / {ALL_BADGES.length} unlocked */}
+          {(new Set([...(user?.badges || []), ...(dailyBadges || [])])).size}
+ / {ALL_BADGES.length} unlocked
+
         </span>
       </div>
       

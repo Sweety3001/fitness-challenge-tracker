@@ -3,7 +3,7 @@ import UserChallenge from "../models/UserChallenge.js";
 import DailyActivity from "../models/DailyActivity.js";
 import Challenge from "../models/Challenge.js";
 import User from "../models/User.js";
-import { BADGES } from "../utils/badges.js";
+// import { BADGES } from "../utils/badges.js";
 
 const getToday = () => new Date().toISOString().split("T")[0];
 
@@ -15,23 +15,32 @@ const evaluateAchievements = async (userId) => {
   const today = getToday();
 
   // ✅ get ALL today logs (no challenge filter)
-  const activityLogs = await ActivityLog.find({
-    user: userId,
-    date: today,
-  });
+ const activityLogs = await ActivityLog.find({
+  user: userId,
+  date: today,
+}).populate("challenge");
+
 
   let totalSteps = 0;
   let totalCalories = 0;
   let totalActiveMinutes = 0;
 
-  for (const log of activityLogs) {
-    const challenge = await Challenge.findById(log.challenge);
-    if (!challenge) continue;
+  // for (const log of activityLogs) {
+  //   const challenge = await Challenge.findById(log.challenge);
+  //   if (!challenge) continue;
 
-    if (challenge.type === "steps") totalSteps += log.value;
-    if (challenge.type === "calories") totalCalories += log.value;
-    if (challenge.type === "active") totalActiveMinutes += log.value;
-  }
+  //   if (challenge.type === "steps") totalSteps += log.value;
+  //   if (challenge.type === "calories") totalCalories += log.value;
+  //   if (challenge.type === "active") totalActiveMinutes += log.value;
+  // }
+for (const log of activityLogs) {
+  if (!log.challenge) continue;
+
+  if (log.challenge.type === "steps") totalSteps += log.value;
+  if (log.challenge.type === "calories") totalCalories += log.value;
+  if (log.challenge.type === "active") totalActiveMinutes += log.value;
+}
+
 
   const daily = await DailyActivity.findOne({ user: userId, date: today });
 
@@ -44,45 +53,94 @@ const evaluateAchievements = async (userId) => {
   const permanentUnlocked = [];
   const dailyUnlocked = [];
 
-  for (const badge of BADGES) {
-    switch (badge.key) {
-      case "first_challenge": {
-        const hasAnyActivity = await ActivityLog.exists({ user: userId });
-        if (hasAnyActivity && !user.badges.includes(badge.key)) {
-          permanentUnlocked.push(badge.key);
-        }
-        break;
-      }
+  // for (const badge of BADGES) {
+  //   switch (badge.key) {
+  //     case "first_challenge": {
+  //       const hasAnyActivity = await ActivityLog.exists({ user: userId });
+  //       if (hasAnyActivity && !user.badges.includes(badge.key)) {
+  //         permanentUnlocked.push(badge.key);
+  //       }
+  //       break;
+  //     }
 
-      case "steps_10k_day":
-        if (totalSteps >= 10000) dailyUnlocked.push(badge.key);
-        break;
+  //     case "steps_10k_day":
+  //       if (totalSteps >= 10000) dailyUnlocked.push(badge.key);
+  //       break;
 
-      case "calorie_crusher":
-        if (totalCalories >= 500) dailyUnlocked.push(badge.key);
-        break;
+  //     case "calorie_crusher":
+  //       if (totalCalories >= 500) dailyUnlocked.push(badge.key);
+  //       break;
 
-      case "streak_7":
-        if (user.streak >= 7 && !user.badges.includes(badge.key)) {
-          permanentUnlocked.push(badge.key);
-        }
-        break;
+  //     case "streak_7":
+  //       if (user.streak >= 7 && !user.badges.includes(badge.key)) {
+  //         permanentUnlocked.push(badge.key);
+  //       }
+  //       break;
 
-      case "streak_30":
-        if (user.streak >= 30 && !user.badges.includes(badge.key)) {
-          permanentUnlocked.push(badge.key);
-        }
-        break;
-    }
-  }
+  //     case "streak_30":
+  //       if (user.streak >= 30 && !user.badges.includes(badge.key)) {
+  //         permanentUnlocked.push(badge.key);
+  //       }
+  //       break;
+  //   }
+  // }
+  // -------- DAILY BADGES --------
+if (totalSteps >= 10000) {
+  dailyUnlocked.push("steps_10k_day");
+}
+
+if (totalCalories >= 500) {
+  dailyUnlocked.push("calorie_crusher");
+}
+
+// -------- PERMANENT BADGES --------
+const hasAnyActivity = await ActivityLog.exists({ user: userId });
+
+if (hasAnyActivity && !user.badges.includes("first_challenge")) {
+  permanentUnlocked.push("first_challenge");
+}
+
+if (user.streak >= 7 && !user.badges.includes("streak_7")) {
+  permanentUnlocked.push("streak_7");
+}
+
+if (user.streak >= 30 && !user.badges.includes("streak_30")) {
+  permanentUnlocked.push("streak_30");
+}
+const completedChallenge = await UserChallenge.exists({
+  user: userId,
+  completed: true
+});
+
+if (completedChallenge && !user.badges.includes("marathon_runner")) {
+  permanentUnlocked.push("marathon_runner");
+}
+// const hours = activityLogs.map(log => new Date(log.createdAt).getHours());
+const hours = [
+  ...activityLogs.map(log => new Date(log.createdAt).getHours()),
+  daily ? new Date(daily.updatedAt).getHours() : null
+].filter(h => h !== null);
+
+if (hours.some(h => h < 8)) {
+  dailyUnlocked.push("early_bird");
+}
+
+if (hours.some(h => h >= 22)) {
+  dailyUnlocked.push("night_owl");
+}
 
   if (permanentUnlocked.length > 0) {
     user.badges.push(...permanentUnlocked);
     user.badges = [...new Set(user.badges)];
     await user.save();
   }
+const uniqueDailyUnlocked = [...new Set(dailyUnlocked)];
 
-  return { permanentUnlocked, dailyUnlocked };
+  // return { permanentUnlocked, dailyUnlocked };
+  return {
+  permanentUnlocked,
+  dailyUnlocked: uniqueDailyUnlocked
+};
 };
 
 
