@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import { AnimatePresence } from "framer-motion";
 import Dashboard from "./pages/Dashboard";
 import ProfileSetup from "./pages/ProfileSetup";
-
+import AIAssistant from "./components/AIAssistant";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -124,6 +124,7 @@ function App() {
       <AnimatedRoutes />
       {/* ToastContainer with default configuration */}
       <ToastContainer />
+      <AIAssistant />
     </Router>
   );
 }
