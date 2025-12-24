@@ -15,6 +15,46 @@ const getTodayAchievements = async (req, res) => {
   });
 };
 
+
+const getTodaySummary = async (req, res) => {
+  try {
+    const today = getToday();
+
+    const activityLogs = await ActivityLog.find({
+      user: req.user._id,
+      date: today,
+    }).populate("challenge");
+
+    let totalSteps = 0;
+    let totalCalories = 0;
+
+    for (const log of activityLogs) {
+      if (!log.challenge) continue;
+
+      if (log.challenge.type === "steps") totalSteps += log.value;
+      if (log.challenge.type === "calories") totalCalories += log.value;
+    }
+
+    const daily = await DailyActivity.findOne({
+      user: req.user._id,
+      date: today,
+    });
+
+    if (daily) {
+      totalSteps += daily.steps || 0;
+      totalCalories += daily.calories || 0;
+    }
+
+    res.json({
+      steps: totalSteps,
+      calories: totalCalories,
+    });
+  } catch (err) {
+    console.error("TODAY SUMMARY ERROR:", err);
+    res.status(500).json({ message: "Failed to fetch today summary" });
+  }
+};
+
 /* ======================================================
    ACHIEVEMENT EVALUATION (SINGLE SOURCE OF TRUTH)
 ====================================================== */
@@ -92,7 +132,7 @@ for (const log of activityLogs) {
   //       break;
   //   }
   // }
-  // -------- DAILY BADGES --------
+  // 
 if (totalSteps >= 10000) {
   dailyUnlocked.push("steps_10k_day");
 }
@@ -251,11 +291,33 @@ const logActivity = async (req, res) => {
     //   await uc.save();
     // }
 
-    await DailyActivity.findOneAndUpdate(
-      { user: req.user._id, date: today },
-      { $inc: { workoutMinutes: value } },
-      { upsert: true }
-    );
+    // await DailyActivity.findOneAndUpdate(
+    //   { user: req.user._id, date: today },
+    //   { $inc: { workoutMinutes: value } },
+    //   { upsert: true }
+    // );
+// ✅ update DailyActivity correctly based on challenge type
+const dailyInc = {};
+
+if (challenge.type === "steps") {
+  dailyInc.steps = value;
+}
+
+if (challenge.type === "calories") {
+  dailyInc.calories = value;   // 🔥 THIS FIXES LIVE SNAPSHOT
+}
+
+if (challenge.type === "active") {
+  dailyInc.workoutMinutes = value;
+}
+
+if (Object.keys(dailyInc).length > 0) {
+  await DailyActivity.findOneAndUpdate(
+    { user: req.user._id, date: today },
+    { $inc: dailyInc },
+    { upsert: true, new: true }
+  );
+}
 
     const badges = await evaluateAchievements(req.user._id);
     const user = await User.findById(req.user._id);
@@ -333,4 +395,4 @@ const logSteps = async (req, res) => {
   }
 };
 
-export { logActivity, logSteps, getTodayAchievements};
+export { logActivity, logSteps, getTodayAchievements, getTodaySummary};

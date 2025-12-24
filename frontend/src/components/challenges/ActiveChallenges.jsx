@@ -4,7 +4,7 @@ import { api } from "../../api/api";
 import ChallengeCard from "./ChallengeCard";
 import LogActivityModal from "./LogActivityModal";
 
-const ActiveChallenges = () => {
+const ActiveChallenges = ({onActivityLogged}) => {
   const navigate = useNavigate();
 
   const [challenges, setChallenges] = useState([]);
@@ -186,6 +186,7 @@ const ActiveChallenges = () => {
       setActiveChallenge(null);
       fetchChallenges();
       // fetchTodayStats();
+      if(onActivityLogged) onActivityLogged();
     }}
   />
 )}

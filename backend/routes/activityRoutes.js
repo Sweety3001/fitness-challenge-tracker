@@ -24,36 +24,84 @@ router.get("/today-achievements", protect, getTodayAchievements);
  * TODAY SNAPSHOT
  * ===============================
  */
+// router.get("/today", protect, async (req, res) => {
+//   try {
+//     const today = new Date().toISOString().split("T")[0];
+
+//     const daily = await DailyActivity.findOne({
+//       user: req.user._id,
+//       date: today,
+//     });
+
+//     // If no activity yet today, return zeros
+//     if (!daily) {
+//       return res.json({
+//         steps: 0,
+//         calories: 0,
+//         workoutTime: 0,
+//         streak: 0, // will be handled later
+//       });
+//     }
+
+//     res.json({
+//       steps: daily.steps,
+//       calories: daily.calories,
+//       workoutTime: daily.workoutMinutes,
+//       streak: 0, // placeholder (we'll fix streak next)
+//     });
+//   } catch (err) {
+//     console.error("TODAY SNAPSHOT ERROR:", err);
+//     res.status(500).json({ message: "Failed to fetch today snapshot" });
+//   }
+// });
+
 router.get("/today", protect, async (req, res) => {
   try {
     const today = new Date().toISOString().split("T")[0];
 
+    // 1️⃣ Get daily summary
     const daily = await DailyActivity.findOne({
       user: req.user._id,
       date: today,
     });
 
-    // If no activity yet today, return zeros
-    if (!daily) {
-      return res.json({
-        steps: 0,
-        calories: 0,
-        workoutTime: 0,
-        streak: 0, // will be handled later
-      });
-    }
+    // 2️⃣ Get challenge-based activity
+    const logs = await ActivityLog.find({
+      user: req.user._id,
+      date: today,
+    }).populate("challenge");
+
+    let stepsFromChallenges = 0;
+    let caloriesFromChallenges = 0;
+
+    logs.forEach(log => {
+      if (!log.challenge) return;
+
+      // if (log.challenge.type === "steps") {
+      //   stepsFromChallenges += log.value;
+      // }
+
+      // if (log.challenge.type === "calories") {
+      //   caloriesFromChallenges += log.value;
+      // }
+    });
 
     res.json({
-      steps: daily.steps,
-      calories: daily.calories,
-      workoutTime: daily.workoutMinutes,
-      streak: 0, // placeholder (we'll fix streak next)
+      steps:
+        (daily?.steps || 0) + stepsFromChallenges,
+
+      calories:
+        (daily?.calories || 0) + caloriesFromChallenges,
+
+      workoutTime: daily?.workoutMinutes || 0,
+      streak: 0, // unchanged
     });
   } catch (err) {
     console.error("TODAY SNAPSHOT ERROR:", err);
     res.status(500).json({ message: "Failed to fetch today snapshot" });
   }
 });
+
 
 /**
  * ===============================

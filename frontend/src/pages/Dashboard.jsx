@@ -171,20 +171,35 @@ const Dashboard = () => {
   }, [user]);
 
   // Fetch Today Snapshot
-  useEffect(() => {
-    const loadTodaySnapshot = async () => {
-      try {
-        const snapshot = await api.getTodaySnapshot();
-        setTodayStats(snapshot);
-      } catch (err) {
-        console.error("Dashboard today snapshot error:", err);
-      } finally {
-        setTodayLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const loadTodaySnapshot = async () => {
+  //     try {
+  //       const snapshot = await api.getTodaySnapshot();
+  //       setTodayStats(snapshot);
+  //     } catch (err) {
+  //       console.error("Dashboard today snapshot error:", err);
+  //     } finally {
+  //       setTodayLoading(false);
+  //     }
+  //   };
 
-    loadTodaySnapshot();
-  }, []);
+  //   loadTodaySnapshot();
+  // }, []);
+  const loadTodaySnapshot = async () => {
+  try {
+    const snapshot = await api.getTodaySnapshot();
+    setTodayStats(snapshot);
+  } catch (err) {
+    console.error("Dashboard today snapshot error:", err);
+  } finally {
+    setTodayLoading(false);
+  }
+};
+
+useEffect(() => {
+  loadTodaySnapshot();
+}, []);
+
   
 useEffect(() => {
   const loadWeeklyActivity = async () => {
@@ -226,7 +241,9 @@ useEffect(() => {
         streak={user.streak ?? 0}
       />
 
-      <ActiveChallenges />
+      {/* <ActiveChallenges /> */}
+      <ActiveChallenges onActivityLogged={loadTodaySnapshot} />
+
 
       {/* ACHIEVEMENTS */}
       <Achievements />

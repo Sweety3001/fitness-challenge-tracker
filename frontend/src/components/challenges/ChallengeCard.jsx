@@ -30,6 +30,10 @@ import { useNavigate } from "react-router-dom";
   const isCompleted = completedToday===true;
   const canLog = type === "steps" || !isCompleted; // New boolean for logging logic
   const isActiveSteps = type === "steps" && !isCompleted;
+  const isTargetReached =
+  typeof todayValue === "number" &&
+  typeof target === "number" &&
+  todayValue >= target;
 
   return (
     <div
@@ -80,7 +84,7 @@ import { useNavigate } from "react-router-dom";
         </div>
 
         <div className="h-2.5 rounded-full bg-white/10 overflow-hidden">
-          <div
+          {/* <div
             className={`h-full rounded-full ${
               isCompleted
                 ? "bg-green-500"
@@ -89,10 +93,19 @@ import { useNavigate } from "react-router-dom";
             style={{ width: `${Number(progress) > 0 ? Math.min(progress, 100) : 0}%` }}
 
           />
-        </div>
+        </div> */}
+        <div
+  className={`h-full rounded-full ${
+    isTargetReached
+      ? "bg-green-500"
+      : "bg-gradient-to-r from-violet-500 to-purple-600"
+  }`}
+  style={{ width: `${Number(progress) > 0 ? Math.min(progress, 100) : 0}%` }}
+/>
+</div>
 
         {/* Steps-only today info */}
-        {type === "steps" && typeof todayValue === "number" && target && (
+        {/* {type === "steps" && typeof todayValue === "number" && target && (
           <p className="mt-3 text-sm text-gray-400">
             Today:{" "}
             <span className="font-medium text-white">
@@ -100,7 +113,18 @@ import { useNavigate } from "react-router-dom";
             </span>{" "}
             / {target.toLocaleString()} {unit}
           </p>
-        )}
+        )} */}
+        {/* Today progress (ALL challenges) */}
+{typeof todayValue === "number" && typeof target === "number" && (
+  <p className="mt-3 text-sm text-gray-400">
+    Today:{" "}
+    <span className="font-medium text-white">
+      {todayValue.toLocaleString()}
+    </span>{" "}
+    / {target.toLocaleString()} {unit}
+  </p>
+)}
+
       </div>
 
       {/* Actions */}

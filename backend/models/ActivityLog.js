@@ -16,7 +16,7 @@ const activityLogSchema = new mongoose.Schema(
       required: true,
     },
     date: {
-      type: String, // ✅ YYYY-MM-DD (IMPORTANT)
+      type: String,
       required: true,
     },
   },
